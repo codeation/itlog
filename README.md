@@ -2,12 +2,14 @@
 
 This is a part of cross-platform GUI Library for Go. See https://github.com/codeation/impress
 
-The Cgo terminal is a Go version of the impress terminal with minimal C code (GTK-3 library, etc.).
+The Cgo terminal is a Go version of the impress terminal with minimal C code (GTK+ 3 library, etc.).
 
 Reasons to have a version of Cgo besides the C version:
 
-- Clean logic of using GTK-3.
+- Clean logic of using GTK+ 3.
 - A place to inject high-level code on the terminal side for debugging or benchmarking.
+
+GTK+ 3 binding package [![PkgGoDev](https://pkg.go.dev/badge/github.com/codeation/itlog/gtk)](https://pkg.go.dev/github.com/codeation/itlog/gtk)
 
 ### To run this example on Debian/ Ubuntu:
 
