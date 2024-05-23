@@ -1,15 +1,16 @@
-# Cgo impress terminal
+# impress terminal. Developer version
 
 This is a part of cross-platform GUI Library for Go. See https://github.com/codeation/impress
 
-The Cgo terminal is a Go version of the impress terminal with minimal C code (GTK+ 3 library, etc.).
+The developer version is a Go version of [the impress terminal](https://github.com/codeation/it) with minimal C code (GTK+ 3 library, etc).
 
-Reasons to have a version of Cgo besides the C version:
+Reasons to have a developer version besides the C version:
 
-- Clean logic of using GTK+ 3.
-- A place to inject high-level code on the terminal side for debugging or benchmarking.
+- A reference implementation of the client side.
+- A place to inject high-level code on the client side for debugging or benchmarking.
+- Highlight the clean logic of using GTK+ 3.
 
-GTK+ 3 binding package [![PkgGoDev](https://pkg.go.dev/badge/github.com/codeation/itlog/gtk)](https://pkg.go.dev/github.com/codeation/itlog/gtk)
+Yet another GTK+ 3 binding package inside [![PkgGoDev](https://pkg.go.dev/badge/github.com/codeation/itlog/gtk)](https://pkg.go.dev/github.com/codeation/itlog/gtk)
 
 ### To run this example on Debian/ Ubuntu:
 
@@ -25,8 +26,8 @@ sudo apt-get install libgtk-3-dev
 
 ```
 git clone https://github.com/codeation/itlog.git
-cd it
-go build -o it-log ./cmd
+cd itlog
+go build -o itlog github.com/codeation/itlog/cmd
 cd ..
 ```
 
@@ -35,7 +36,7 @@ cd ..
 ```
 git clone https://github.com/codeation/impress.git
 cd impress
-IMPRESS_TERMINAL_PATH=../itlog/it-log go run ./examples/simple/
+IMPRESS_TERMINAL_PATH=../itlog/itlog go run github.com/codeation/impress/examples/simple/
 ```
 
 Steps 0-2 are needed to build a Cgo version of impress terminal.
@@ -44,5 +45,5 @@ Steps 0-2 are needed to build a Cgo version of impress terminal.
 
 ### Notes
 
-- This project is still in the early stages of development and is not yet in a usable state.
-- The project tested on Debian 12.5
+- The project is currently in its beta stage.
+- The project tested on Debian 12.5.
