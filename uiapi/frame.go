@@ -37,7 +37,6 @@ func (u *uiAPI) FrameNew(frameID int, parentFrameID int, x, y, width, height int
 
 	if f.isTop() {
 		u.top.ShowAll()
-		u.top.SignalConfigure(u.onConfigure)
 		f.gtkFrame.SignalSizeAllocate(u.onSizeAllocate)
 	} else {
 		f.gtkFrame.Move(f.x, f.y)

@@ -27,13 +27,6 @@ gboolean widget_delete(GtkWidget *widget, gpointer data) {
     return TRUE;
 }
 
-void widgetConfigure(GtkWindow *window, GdkEventConfigure *event, gpointer data);
-
-gboolean widget_configure(GtkWindow *window, GdkEventConfigure *event, gpointer data) {
-    widgetConfigure(window, event, data);
-    return FALSE;
-}
-
 void widgetSizeAllocate(GtkWidget *widget, GtkAllocation *allocation, gpointer data);
 
 void widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation, gpointer data) {

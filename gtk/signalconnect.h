@@ -10,7 +10,6 @@ void app_shutdown(GApplication *application, gpointer data);
 // Widget
 gboolean window_draw(GtkWidget *widget, cairo_t *cr, gpointer data);
 gboolean widget_delete(GtkWidget *widget, gpointer data);
-gboolean widget_configure(GtkWindow *window, GdkEventConfigure *event, gpointer data);
 void widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation, gpointer data);
 gboolean widget_key_press(GtkWidget *widget, GdkEventKey *event, gpointer data);
 gboolean widget_button_press(GtkWidget *widget, GdkEventButton *event, gpointer data);

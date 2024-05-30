@@ -16,8 +16,7 @@ var (
 	menuActionFn    func(h *cgo.Handle)
 	drawFn          func(cr *Cairo, h *cgo.Handle)
 	deleteFn        func()
-	configureFn     func()
-	sizeAllocateFn  func()
+	sizeAllocateFn  func(allocation *GtkAllocation)
 	keyPressFn      func(event *GdkEventKey)
 	buttonPressFn   func(event *GdkEventButton)
 	buttonReleaseFn func(event *GdkEventButton)
@@ -76,25 +75,12 @@ func (widget *Widget) SignalDelete(callback func()) {
 	widget.signalHandlers = append(widget.signalHandlers, signalHandlerID)
 }
 
-//export widgetConfigure
-func widgetConfigure(window *C.GtkWindow, event *C.GdkEventConfigure, data C.gpointer) {
-	configureFn()
-}
-
-func (widget *Widget) SignalConfigure(callback func()) {
-	configureFn = callback
-	name := C.CString("configure-event")
-	defer C.free(unsafe.Pointer(name))
-	signalHandlerID := C.GSignalConnect(widget.GObject(), name, C.GCallback(C.widget_configure), nil)
-	widget.signalHandlers = append(widget.signalHandlers, signalHandlerID)
-}
-
 //export widgetSizeAllocate
 func widgetSizeAllocate(widget *C.GtkWidget, allocation *C.GtkAllocation, data C.gpointer) {
-	sizeAllocateFn()
+	sizeAllocateFn((*GtkAllocation)(allocation))
 }
 
-func (widget *Widget) SignalSizeAllocate(callback func()) {
+func (widget *Widget) SignalSizeAllocate(callback func(allocation *GtkAllocation)) {
 	sizeAllocateFn = callback
 	name := C.CString("size-allocate")
 	defer C.free(unsafe.Pointer(name))

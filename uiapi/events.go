@@ -31,8 +31,8 @@ func (u *uiAPI) onScroll(event *gtk.GdkEventScroll) {
 
 var prevWidth, prevHeight, prevInnerWidth, prevInnerHeight int
 
-func (u *uiAPI) onConfigure() {
-	width, height, innerWidth, innerHeight := gtk.GdkConfigure(u.top, u.frames[1].gtkFrame)
+func (u *uiAPI) onSizeAllocate(allocation *gtk.GtkAllocation) {
+	width, height, innerWidth, innerHeight := gtk.GdkConfigure(allocation, u.top)
 	if innerWidth == 1 && innerHeight == 1 {
 		return
 	}
@@ -42,16 +42,6 @@ func (u *uiAPI) onConfigure() {
 	}
 	prevWidth, prevHeight, prevInnerWidth, prevInnerHeight = width, height, innerWidth, innerHeight
 	u.callbacks.EventConfigure(width, height, innerWidth, innerHeight)
-}
-
-var sizeAllocated = false
-
-func (u *uiAPI) onSizeAllocate() {
-	if sizeAllocated {
-		return
-	}
-	sizeAllocated = true
-	u.callbacks.EventConfigure(gtk.GdkConfigure(u.top, u.frames[1].gtkFrame))
 }
 
 func (u *uiAPI) onClipboardText(text string) {

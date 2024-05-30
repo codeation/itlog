@@ -5,7 +5,7 @@ package gtk
 // #include "macro.h"
 import "C"
 
-type GdkEventConfigure C.GdkEventConfigure
+type GtkAllocation C.GtkAllocation
 type GdkEventKey C.GdkEventKey
 type GdkEventButton C.GdkEventButton
 type GdkEventMotion C.GdkEventMotion
@@ -13,13 +13,11 @@ type GdkEventScroll C.GdkEventScroll
 
 var layoutOffsetX, layoutOffsetY C.int
 
-func GdkConfigure(top *WindowWidget, layout *FrameWidget) (int, int, int, int) {
-	C.gtk_widget_translate_coordinates(layout.w, top.w, 0, 0, &layoutOffsetX, &layoutOffsetY)
-	var w, h C.gint
-	C.gtk_window_get_size(top.GtkWindow(), &w, &h)
-	innerWidth := int(C.gtk_widget_get_allocated_width(layout.w))
-	innerHeight := int(C.gtk_widget_get_allocated_height(layout.w))
-	return int(w), int(h), innerWidth, innerHeight
+func GdkConfigure(allocation *GtkAllocation, top *WindowWidget) (int, int, int, int) {
+	layoutOffsetX, layoutOffsetY = allocation.x, allocation.y
+	var width, height C.gint
+	C.gtk_window_get_size(top.GtkWindow(), &width, &height)
+	return int(width), int(height), int(allocation.width), int(allocation.height)
 }
 
 func GdkKey(event *GdkEventKey) (rune, bool, bool, bool, bool, string) {
