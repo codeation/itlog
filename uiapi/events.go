@@ -33,9 +33,6 @@ var prevWidth, prevHeight, prevInnerWidth, prevInnerHeight int
 
 func (u *uiAPI) onSizeAllocate(allocation *gtk.GtkAllocation) {
 	width, height, innerWidth, innerHeight := gtk.GdkConfigure(allocation, u.top)
-	if innerWidth == 1 && innerHeight == 1 {
-		return
-	}
 	if width == prevWidth && height == prevHeight &&
 		innerWidth == prevInnerWidth && innerHeight == prevInnerHeight {
 		return
