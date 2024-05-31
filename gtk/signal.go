@@ -65,7 +65,7 @@ func (widget *Widget) SignalDraw(h *cgo.Handle) {
 }
 
 //export widgetDelete
-func widgetDelete(widget *C.GtkWidget, data C.gpointer) { deleteFn() }
+func widgetDelete(widget *C.GtkWidget, event *C.GdkEvent, data C.gpointer) { deleteFn() }
 
 func (widget *Widget) SignalDelete(callback func()) {
 	deleteFn = callback

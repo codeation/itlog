@@ -20,10 +20,10 @@ gboolean window_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
     return FALSE;
 }
 
-void widgetDelete(GtkWidget *widget, gpointer data);
+void widgetDelete(GtkWidget *widget, GdkEvent *event, gpointer data);
 
-gboolean widget_delete(GtkWidget *widget, gpointer data) {
-    widgetDelete(widget, data);
+gboolean widget_delete(GtkWidget *widget, GdkEvent *event, gpointer data) {
+    widgetDelete(widget, event, data);
     return TRUE;
 }
 
