@@ -6,8 +6,18 @@ import (
 	"github.com/codeation/itlog/gtk"
 )
 
+type gtkFramer interface {
+	NewFixed() *gtk.FixedWidget
+	NewDrawingArea() *gtk.DrawingWidget
+	Destroy()
+	Show()
+	Move(x, y int)
+	Size(width, height int)
+	Raise()
+}
+
 type frame struct {
-	gtkFrame *gtk.FrameWidget
+	gtkFrame gtkFramer
 	id       int
 	parentID int
 	x, y     int
@@ -22,8 +32,13 @@ func (u *uiAPI) FrameNew(frameID int, parentFrameID int, x, y, width, height int
 		x:        x,
 		y:        y,
 	}
+	u.frames[frameID] = f
+
 	if f.isTop() {
-		f.gtkFrame = u.top.NewLayout()
+		layout := u.top.NewLayout()
+		f.gtkFrame = layout
+		u.top.ShowAll()
+		layout.SignalSizeAllocate(u.onSizeAllocate)
 	} else {
 		parent, ok := u.frames[parentFrameID]
 		if !ok {
@@ -31,14 +46,6 @@ func (u *uiAPI) FrameNew(frameID int, parentFrameID int, x, y, width, height int
 			return
 		}
 		f.gtkFrame = parent.gtkFrame.NewFixed()
-	}
-
-	u.frames[frameID] = f
-
-	if f.isTop() {
-		u.top.ShowAll()
-		f.gtkFrame.SignalSizeAllocate(u.onSizeAllocate)
-	} else {
 		f.gtkFrame.Move(f.x, f.y)
 		f.gtkFrame.Size(width, height)
 		f.gtkFrame.Show()

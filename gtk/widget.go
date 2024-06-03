@@ -5,14 +5,28 @@ package gtk
 // #include "macro.h"
 import "C"
 
+type parentWidget interface {
+	addChild(child *Widget)
+	moveChild(child *Widget, x, y int)
+	raiseChild(child *Widget)
+	NewFixed() *FixedWidget
+	NewDrawingArea() *DrawingWidget
+}
+
 type Widget struct {
 	w              *C.GtkWidget
 	signalHandlers []C.gulong
 }
 
-func (widget *Widget) Widget() *C.GtkWidget { return widget.w }
-func (widget *Widget) GPointer() C.gpointer { return C.widgetToGPointer(widget.w) }
-func (widget *Widget) GObject() *C.GObject  { return C.widgetToGObject(widget.w) }
+func newWidget(w *C.GtkWidget) *Widget {
+	return &Widget{
+		w: w,
+	}
+}
+
+func (widget *Widget) GtkWidget() *C.GtkWidget { return widget.w }
+func (widget *Widget) GPointer() C.gpointer    { return C.widgetToGPointer(widget.w) }
+func (widget *Widget) GObject() *C.GObject     { return C.widgetToGObject(widget.w) }
 
 func (widget *Widget) Destroy() {
 	for _, signalHandlerID := range widget.signalHandlers {
@@ -21,87 +35,114 @@ func (widget *Widget) Destroy() {
 	C.gtk_widget_destroy(widget.w)
 }
 
-func (widget *Widget) Show()    { C.gtk_widget_show(widget.w) }
-func (widget *Widget) ShowAll() { C.gtk_widget_show_all(widget.w) }
+func (widget *Widget) Show() { C.gtk_widget_show(widget.w) }
 
-// type WindowWidget contain GtkApplicationWindow widget
+func (widget *Widget) size(width, height int) {
+	C.gtk_widget_set_size_request(widget.w, C.int(width), C.int(height))
+}
+
+func (widget *Widget) addChild(child *Widget) {
+	C.gtk_container_add(C.widgetToGtkContainer(widget.w), child.w)
+}
+
+func (widget *Widget) removeChild(child *Widget) {
+	C.gtk_container_remove(C.widgetToGtkContainer(widget.w), child.w)
+}
+
+func (widget *Widget) raiseChild(child *Widget) {
+	C.g_object_ref(child.GPointer())
+	widget.removeChild(child)
+	widget.addChild(child)
+	C.g_object_unref(child.GPointer())
+}
+
+// type WindowWidget contains GtkApplicationWindow widget
 type WindowWidget struct {
 	*Widget
 }
 
 func (app *Application) NewWindow() *WindowWidget {
 	return &WindowWidget{
-		Widget: &Widget{
-			w: C.gtk_application_window_new(app.GtkApplication()),
-		},
+		Widget: newWidget(C.gtk_application_window_new(app.GtkApplication())),
 	}
 }
 
 func (widget *WindowWidget) GtkWindow() *C.GtkWindow { return C.widgetToGtkWindow(widget.w) }
+
+func (widget *WindowWidget) ShowAll() { C.gtk_widget_show_all(widget.w) }
 
 func (widget *WindowWidget) Size(x, y, width, height int) {
 	C.gtk_window_move(widget.GtkWindow(), C.int(x), C.int(y))
 	C.gtk_window_resize(widget.GtkWindow(), C.int(width), C.int(height))
 }
 
-// type FrameWidget contain GtkLayout, GtkFixed or DrawingArea widget
-type FrameWidget struct {
+// LayoutWidget contains GtkLayoutWidget
+type LayoutWidget struct {
 	*Widget
-	parent *Widget
 }
 
-func (parent *Widget) NewLayout() *FrameWidget {
-	layout := &FrameWidget{
-		Widget: &Widget{
-			w: C.gtk_layout_new(nil, nil),
-		},
-		parent: parent,
+func (widget *WindowWidget) NewLayout() *LayoutWidget {
+	layout := &LayoutWidget{
+		Widget: newWidget(C.gtk_layout_new(nil, nil)),
 	}
-	C.gtk_container_add(C.widgetToGtkContainer(parent.w), layout.w)
+	widget.addChild(layout.Widget)
 	return layout
 }
 
-func (parent *Widget) NewFixed() *FrameWidget {
-	fixed := &FrameWidget{
-		Widget: &Widget{
-			w: C.gtk_fixed_new(),
-		},
+func (widget *LayoutWidget) NewFixed() *FixedWidget         { return newFixedWidget(widget) }
+func (widget *LayoutWidget) NewDrawingArea() *DrawingWidget { return newDrawingArea(widget) }
+func (widget *LayoutWidget) Size(width, height int)         { widget.size(width, height) }
+func (widget *LayoutWidget) Move(x, y int)                  {}
+func (widget *LayoutWidget) Raise()                         {}
+
+func (widget *LayoutWidget) moveChild(child *Widget, x, y int) {
+	C.gtk_layout_move(C.widgetToGtkLayout(widget.w), child.w, C.int(x), C.int(y))
+}
+
+// type FixedWidget contains GtkFixedWidget
+type FixedWidget struct {
+	*Widget
+	parent parentWidget
+}
+
+func newFixedWidget(parent parentWidget) *FixedWidget {
+	fixed := &FixedWidget{
+		Widget: newWidget(C.gtk_fixed_new()),
 		parent: parent,
 	}
-	C.gtk_container_add(C.widgetToGtkContainer(parent.w), fixed.w)
+	parent.addChild(fixed.Widget)
 	return fixed
 }
 
-func (parent *FrameWidget) NewDrawingArea() *FrameWidget {
-	drawing := &FrameWidget{
-		Widget: &Widget{
-			w: C.gtk_drawing_area_new(),
-		},
-		parent: parent.Widget,
+func (widget *FixedWidget) NewFixed() *FixedWidget         { return newFixedWidget(widget) }
+func (widget *FixedWidget) NewDrawingArea() *DrawingWidget { return newDrawingArea(widget) }
+func (widget *FixedWidget) Size(width, height int)         { widget.size(width, height) }
+func (widget *FixedWidget) Move(x, y int)                  { widget.parent.moveChild(widget.Widget, x, y) }
+func (widget *FixedWidget) Raise()                         { widget.parent.raiseChild(widget.Widget) }
+
+func (widget *FixedWidget) moveChild(child *Widget, x, y int) {
+	C.gtk_fixed_move(C.widgetToGtkFixed(widget.w), child.w, C.int(x), C.int(y))
+}
+
+// DrawingWidget contains DrawingAreaWidget
+type DrawingWidget struct {
+	*Widget
+	parent parentWidget
+}
+
+func newDrawingArea(parent parentWidget) *DrawingWidget {
+	drawing := &DrawingWidget{
+		Widget: newWidget(C.gtk_drawing_area_new()),
+		parent: parent,
 	}
-	C.gtk_container_add(C.widgetToGtkContainer(parent.w), drawing.w)
+	parent.addChild(drawing.Widget)
 	return drawing
 }
 
-func (frame *FrameWidget) Size(width, height int) {
-	C.gtk_widget_set_size_request(frame.w, C.int(width), C.int(height))
-}
+func (widget *DrawingWidget) Size(width, height int) { widget.size(width, height) }
+func (widget *DrawingWidget) Move(x, y int)          { widget.parent.moveChild(widget.Widget, x, y) }
+func (widget *DrawingWidget) Raise()                 { widget.parent.raiseChild(widget.Widget) }
 
-func (frame *FrameWidget) Move(x, y int) {
-	if C.widgetIsLayout(frame.parent.w) != 0 {
-		C.gtk_layout_move(C.widgetToGtkLayout(frame.parent.w), frame.w, C.int(x), C.int(y))
-	} else {
-		C.gtk_fixed_move(C.widgetToGtkFixed(frame.parent.w), frame.w, C.int(x), C.int(y))
-	}
-}
-
-func (frame *FrameWidget) Raise() {
-	C.g_object_ref(frame.GPointer())
-	C.gtk_container_remove(C.widgetToGtkContainer(frame.parent.w), frame.w)
-	C.gtk_container_add(C.widgetToGtkContainer(frame.parent.w), frame.w)
-	C.g_object_unref(frame.GPointer())
-}
-
-func (frame *FrameWidget) QueueDraw() {
-	C.gtk_widget_queue_draw(frame.w)
+func (widget *DrawingWidget) QueueDraw() {
+	C.gtk_widget_queue_draw(widget.w)
 }

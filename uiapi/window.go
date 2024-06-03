@@ -16,7 +16,7 @@ type destroyer interface {
 }
 
 type window struct {
-	gtkDrawing *gtk.FrameWidget
+	gtkDrawing *gtk.DrawingWidget
 	cgoHandle  *cgo.Handle
 	id         int
 	frameID    int
