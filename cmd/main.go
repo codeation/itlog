@@ -41,7 +41,7 @@ func run() error {
 		}
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("gtk.NewStreamIO: %w", err)
 	}
 
 	var requestIO *gtk.WatchIO
@@ -55,7 +55,7 @@ func run() error {
 		}
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("gtk.NewRequestIO: %w", err)
 	}
 
 	dom.Run()

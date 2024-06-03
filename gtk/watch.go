@@ -36,11 +36,13 @@ func chanErr() {
 	os.Exit(1)
 }
 
+// WatchIO is a channel watch IDs
 type WatchIO struct {
 	inputID C.uint
 	errorID C.uint
 }
 
+// NewStreamIO returns a watchers for async pipe
 func NewStreamIO(streamFile fder, readFn func()) (*WatchIO, error) {
 	streamReadFn = readFn
 
@@ -61,6 +63,7 @@ func NewStreamIO(streamFile fder, readFn func()) (*WatchIO, error) {
 	}, nil
 }
 
+// NewRequestIO returns a watchers for full duplex pipe
 func NewRequestIO(syncFile fder, readFn func()) (*WatchIO, error) {
 	requestReadFn = readFn
 
@@ -80,6 +83,7 @@ func NewRequestIO(syncFile fder, readFn func()) (*WatchIO, error) {
 	}, nil
 }
 
+// Done removes channel watchers
 func (w *WatchIO) Done() {
 	C.g_source_remove(w.inputID)
 	C.g_source_remove(w.errorID)

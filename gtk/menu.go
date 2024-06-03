@@ -5,21 +5,25 @@ package gtk
 // #include "macro.h"
 import "C"
 
+// Menu is a GMenu wrapper
 type Menu struct {
 	menu *C.GMenu
 }
 
+// MenuNode represents menu node
 type MenuNode struct {
 	*Menu
 	label *C.char
 }
 
+// MenuItem is a GMenuItem wrapper
 type MenuItem struct {
 	item   *C.GMenuItem
 	label  *C.char
 	action *C.char
 }
 
+// MenuAction is a GSimpleAction wrapper
 type MenuAction struct {
 	simpleAction   *C.GSimpleAction
 	action         *C.char
@@ -27,6 +31,7 @@ type MenuAction struct {
 	signalHandlers []C.gulong
 }
 
+// NewMenu creates application menu
 func (app *Application) NewMenu() *Menu {
 	node := C.g_menu_new()
 	C.gtk_application_set_menubar(app.a, C.menuToGMenuModel(node))
@@ -36,8 +41,10 @@ func (app *Application) NewMenu() *Menu {
 	}
 }
 
+// Destroy destroys application menu
 func (menu *Menu) Destroy() { /* TODO */ }
 
+// NewNode creates new submenu node with label
 func (parent *Menu) NewNode(label string) *MenuNode {
 	node := C.g_menu_new()
 	cLabel := C.CString(label)
@@ -51,6 +58,10 @@ func (parent *Menu) NewNode(label string) *MenuNode {
 	}
 }
 
+// Destroy destroys submenu node
+func (menu *MenuNode) Destroy() { /* TODO */ }
+
+// NewItem adds menu item with label and action to submenu
 func (node *MenuNode) NewItem(label string, action string) *MenuItem {
 	cLabel := C.CString(label)
 	cAction := C.CString(action)
@@ -64,8 +75,10 @@ func (node *MenuNode) NewItem(label string, action string) *MenuItem {
 	}
 }
 
+// Destroy destroys menu item
 func (item *MenuItem) Destroy() { /* TODO */ }
 
+// NewMenuAction creates a new menu action
 func (app *Application) NewMenuAction(action string) *MenuAction {
 	cAction := C.CString(action)
 	alias := C.CString(action[4:])
@@ -78,6 +91,8 @@ func (app *Application) NewMenuAction(action string) *MenuAction {
 	}
 }
 
+// GObject returns C.GObject pointer
 func (action *MenuAction) GObject() *C.GObject { return C.simpleToGObject(action.simpleAction) }
 
+// Destroy destroys menu action
 func (action *MenuAction) Destroy() { /* TODO */ }

@@ -29,6 +29,7 @@ var (
 //export appActivate
 func appActivate(application *C.GApplication, data C.gpointer) { activateFn() }
 
+// SignalActivate connects a callback for "activate" event
 func (app *Application) SignalActivate(callback func()) {
 	activateFn = callback
 	name := C.CString("activate")
@@ -40,6 +41,7 @@ func (app *Application) SignalActivate(callback func()) {
 //export appShutdown
 func appShutdown(application *C.GApplication, data C.gpointer) { shutdownFn() }
 
+// SignalShutdown connects a callback for "shutdown" event
 func (app *Application) SignalShutdown(callback func()) {
 	shutdownFn = callback
 	name := C.CString("shutdown")
@@ -53,10 +55,12 @@ func windowDraw(widget *C.GtkWidget, cr *C.cairo_t, data C.gpointer) {
 	drawFn((*Cairo)(cr), (*cgo.Handle)(data))
 }
 
+// SignalDrawCallback connects a callback for "draw" event
 func SignalDrawCallback(callback func(cr *Cairo, h *cgo.Handle)) {
 	drawFn = callback
 }
 
+// SignalDraw connects a callback parameters for "draw" event
 func (widget *Widget) SignalDraw(h *cgo.Handle) {
 	name := C.CString("draw")
 	defer C.free(unsafe.Pointer(name))
@@ -67,6 +71,7 @@ func (widget *Widget) SignalDraw(h *cgo.Handle) {
 //export widgetDelete
 func widgetDelete(widget *C.GtkWidget, event *C.GdkEvent, data C.gpointer) { deleteFn() }
 
+// SignalDelete connects a callback for "delete-event" event
 func (widget *Widget) SignalDelete(callback func()) {
 	deleteFn = callback
 	name := C.CString("delete-event")
@@ -80,6 +85,7 @@ func widgetSizeAllocate(widget *C.GtkWidget, allocation *C.GtkAllocation, data C
 	sizeAllocateFn((*GtkAllocation)(allocation))
 }
 
+// SignalSizeAllocate connects a callback for "size-allocate" event
 func (widget *Widget) SignalSizeAllocate(callback func(allocation *GtkAllocation)) {
 	sizeAllocateFn = callback
 	name := C.CString("size-allocate")
@@ -93,6 +99,7 @@ func widgetKeyPress(widget *C.GtkWidget, event *C.GdkEventKey, data C.gpointer) 
 	keyPressFn((*GdkEventKey)(event))
 }
 
+// SignalKeyPress connects a callback for "key_press_event" event
 func (widget *Widget) SignalKeyPress(callback func(event *GdkEventKey)) {
 	keyPressFn = callback
 	name := C.CString("key_press_event")
@@ -114,6 +121,7 @@ func widgetButtonPress(widget *C.GtkWidget, event *C.GdkEventButton, data C.gpoi
 	buttonPressFn((*GdkEventButton)(event))
 }
 
+// SignalButtonPress connects a callback for "button_press_event" event
 func (widget *Widget) SignalButtonPress(callback func(event *GdkEventButton)) {
 	buttonPressFn = callback
 	name := C.CString("button_press_event")
@@ -132,6 +140,7 @@ func widgetButtonRelease(widget *C.GtkWidget, event *C.GdkEventButton, data C.gp
 	buttonReleaseFn((*GdkEventButton)(event))
 }
 
+// SignalButtonRelease connects a callback for "button_release_event" event
 func (widget *Widget) SignalButtonRelease(callback func(event *GdkEventButton)) {
 	buttonReleaseFn = callback
 	name := C.CString("button_release_event")
@@ -150,6 +159,7 @@ func widgetMotionNotify(widget *C.GtkWidget, event *C.GdkEventMotion, data C.gpo
 	motionNotifyFn((*GdkEventMotion)(event))
 }
 
+// SignalMotionNotify connects a callback for "motion_notify_event" event
 func (widget *Widget) SignalMotionNotify(callback func(event *GdkEventMotion)) {
 	motionNotifyFn = callback
 	name := C.CString("motion_notify_event")
@@ -163,6 +173,7 @@ func widgetScroll(widget *C.GtkWidget, event *C.GdkEventScroll, data C.gpointer)
 	scrollFn((*GdkEventScroll)(event))
 }
 
+// SignalScroll connects a callback for "scroll-event" event
 func (widget *Widget) SignalScroll(callback func(event *GdkEventScroll)) {
 	scrollFn = callback
 	name := C.CString("scroll-event")
@@ -176,10 +187,12 @@ func menuItemActivate(action *C.GSimpleAction, parameter *C.GVariant, data C.gpo
 	menuActionFn((*cgo.Handle)(data))
 }
 
+// SignalMenuItemActivateCallback connects a callback for "activate" event
 func SignalMenuItemActivateCallback(callback func(h *cgo.Handle)) {
 	menuActionFn = callback
 }
 
+// SignalMenuItemActivate connects a callback  parameters for "activate" event
 func (action *MenuAction) SignalMenuItemActivate(h *cgo.Handle) {
 	name := C.CString("activate")
 	defer C.free(unsafe.Pointer(name))
@@ -192,6 +205,7 @@ func clipboardTextReceived(clipboard *C.GtkClipboard, text *C.gchar, data *C.gpo
 	clipboardFn(C.GoString(text))
 }
 
+// RequestClipboardText connects a callback for clipboard receiving
 func RequestClipboardText(callback func(text string)) {
 	clipboardFn = callback
 	clipboard := C.gtk_clipboard_get(C.GDK_SELECTION_CLIPBOARD)
@@ -203,6 +217,7 @@ func objectWeakRef(data C.gpointer, where_the_object_was *C.GObject) {
 	weakRefFn(uintptr(data))
 }
 
+// NotifyWeakRef connects a callback for weak notify
 func NotifyWeakRef(object *C.GObject, callback func(data uintptr), data uintptr) {
 	weakRefFn = callback
 	C.g_object_weak_ref(object, C.GCallback(C.object_weak_notify), C.gpointer(data))

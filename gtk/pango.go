@@ -9,6 +9,7 @@ import (
 	"unsafe"
 )
 
+// FontSelection is a PangoFontDescription wrapper
 type FontSelection struct {
 	desc   *C.PangoFontDescription
 	family *C.char
@@ -101,10 +102,10 @@ func fontStretch(stretch int) C.PangoStretch {
 		return C.PANGO_STRETCH_ULTRA_EXPANDED
 	default:
 		return C.PANGO_STRETCH_NORMAL
-
 	}
 }
 
+// NewFontSelection creates FontSelection
 func NewFontSelection(height int, family string, style int, variant int, weight int, stretch int) *FontSelection {
 	f := &FontSelection{
 		desc:   C.pango_font_description_new(),
@@ -119,12 +120,14 @@ func NewFontSelection(height int, family string, style int, variant int, weight 
 	return f
 }
 
+// Free destroys font selection
 func (f *FontSelection) Free() {
 	C.pango_font_description_free(f.desc)
 	C.free(unsafe.Pointer(f.family))
 }
 
-func (f *FontSelection) Metrics(top *Widget) (int, int, int, int) {
+// Metrics returns font selection lineheight, baseline, ascent, descent
+func (f *FontSelection) Metrics(top *WindowWidget) (int, int, int, int) {
 	top_pango_context := C.gtk_widget_get_pango_context(top.w)
 	layout := C.pango_layout_new(top_pango_context)
 	C.pango_layout_set_font_description(layout, f.desc)
@@ -138,7 +141,8 @@ func (f *FontSelection) Metrics(top *Widget) (int, int, int, int) {
 	return lineheight, baseline, ascent, descent
 }
 
-func (f *FontSelection) Split(top *Widget, text string, edge, indent int) []int {
+// Split splits text string to substrings
+func (f *FontSelection) Split(top *WindowWidget, text string, edge, indent int) []int {
 	top_pango_context := C.gtk_widget_get_pango_context(top.w)
 	layout := C.pango_layout_new(top_pango_context)
 	C.pango_layout_set_font_description(layout, f.desc)
@@ -156,7 +160,8 @@ func (f *FontSelection) Split(top *Widget, text string, edge, indent int) []int 
 	return output
 }
 
-func (f *FontSelection) Size(top *Widget, text string) (int, int) {
+// Size returns text string width and height in pixels
+func (f *FontSelection) Size(top *WindowWidget, text string) (int, int) {
 	top_pango_context := C.gtk_widget_get_pango_context(top.w)
 	layout := C.pango_layout_new(top_pango_context)
 	C.pango_layout_set_font_description(layout, f.desc)

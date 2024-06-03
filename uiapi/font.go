@@ -20,7 +20,7 @@ func (u *uiAPI) FontNew(fontID int, height int, style, variant, weight, stretch 
 	}
 	u.fonts[fontID] = f
 
-	return f.selection.Metrics(u.top.Widget)
+	return f.selection.Metrics(u.top)
 }
 
 func (u *uiAPI) FontDrop(fontID int) {
@@ -41,7 +41,7 @@ func (u *uiAPI) FontSplit(fontID int, text string, edge, indent int) []int {
 		return nil
 	}
 
-	return f.selection.Split(u.top.Widget, text, edge, indent)
+	return f.selection.Split(u.top, text, edge, indent)
 }
 
 func (u *uiAPI) FontSize(fontID int, text string) (int, int) {
@@ -51,5 +51,5 @@ func (u *uiAPI) FontSize(fontID int, text string) (int, int) {
 		return 0, 0
 	}
 
-	return f.selection.Size(u.top.Widget, text)
+	return f.selection.Size(u.top, text)
 }

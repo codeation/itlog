@@ -8,13 +8,16 @@ import (
 	"unsafe"
 )
 
+// Cairo is a cairo_t wrapper
 type Cairo C.cairo_t
 
+// CairoFillPaint is a fill element parameters
 type CairoFillPaint struct {
 	x, y, width, height C.double
 	r, g, b, a          C.double
 }
 
+// NewCairoFillPaint returns a fill element parameters
 func NewCairoFillPaint(x, y, width, height int, r, g, b, a uint16) *CairoFillPaint {
 	return &CairoFillPaint{
 		x:      C.double(x),
@@ -28,6 +31,7 @@ func NewCairoFillPaint(x, y, width, height int, r, g, b, a uint16) *CairoFillPai
 	}
 }
 
+// Paint paints current element
 func (e *CairoFillPaint) Paint(c *Cairo) {
 	cr := (*C.cairo_t)(c)
 	C.cairo_set_source_rgba(cr, e.r, e.g, e.b, e.a)
@@ -35,11 +39,13 @@ func (e *CairoFillPaint) Paint(c *Cairo) {
 	C.cairo_fill(cr)
 }
 
+// CairoLinePaint is a line element parameters
 type CairoLinePaint struct {
 	x0, y0, x1, y1 C.double
 	r, g, b, a     C.double
 }
 
+// NewCairoLinePaint returns a line element parameters
 func NewCairoLinePaint(x0, y0, x1, y1 int, r, g, b, a uint16) *CairoLinePaint {
 	var xOffset, yOffset C.double
 	if x0 == x1 {
@@ -59,6 +65,7 @@ func NewCairoLinePaint(x0, y0, x1, y1 int, r, g, b, a uint16) *CairoLinePaint {
 	}
 }
 
+// Paint paints current element
 func (e *CairoLinePaint) Paint(c *Cairo) {
 	cr := (*C.cairo_t)(c)
 	C.cairo_set_source_rgba(cr, e.r, e.g, e.b, e.a)
@@ -68,6 +75,7 @@ func (e *CairoLinePaint) Paint(c *Cairo) {
 	C.cairo_stroke(cr)
 }
 
+// CairoTextPaint is a text element parameters
 type CairoTextPaint struct {
 	layout     *C.PangoLayout
 	desc       *C.PangoFontDescription
@@ -76,6 +84,7 @@ type CairoTextPaint struct {
 	r, g, b, a C.double
 }
 
+// NewCairoTextPaint returns a text element parameters
 func NewCairoTextPaint(x, y int, r, g, b, a uint16, font *FontSelection, text string) *CairoTextPaint {
 	return &CairoTextPaint{
 		desc: font.desc,
@@ -89,6 +98,7 @@ func NewCairoTextPaint(x, y int, r, g, b, a uint16, font *FontSelection, text st
 	}
 }
 
+// Paint paints current element
 func (e *CairoTextPaint) Paint(c *Cairo) {
 	cr := (*C.cairo_t)(c)
 	if e.layout == nil {
@@ -101,6 +111,7 @@ func (e *CairoTextPaint) Paint(c *Cairo) {
 	C.pango_cairo_show_layout(cr, e.layout)
 }
 
+// Destroy destroys current element
 func (e *CairoTextPaint) Destroy() {
 	C.free(unsafe.Pointer(e.text))
 	if e.layout != nil {
@@ -108,12 +119,14 @@ func (e *CairoTextPaint) Destroy() {
 	}
 }
 
+// CairoBitmap is a cairo_surface_t wrapper
 type CairoBitmap struct {
 	surface       *C.cairo_surface_t
 	buffer        *C.uchar
 	width, height int
 }
 
+// NewCairoBitmap returns a CairoBitmap from a image bitmap
 func NewCairoBitmap(data []byte, width, height int) *CairoBitmap {
 	const cFormat = C.CAIRO_FORMAT_ARGB32
 	stride := int(C.cairo_format_stride_for_width(cFormat, C.int(width)))
@@ -133,17 +146,20 @@ func NewCairoBitmap(data []byte, width, height int) *CairoBitmap {
 	}
 }
 
+// Destroy destroys image bitmap buffers
 func (e *CairoBitmap) Destroy() {
 	C.cairo_surface_destroy(e.surface)
 	C.free(unsafe.Pointer(e.buffer))
 }
 
+// CairoImagePaint is a image element parameters
 type CairoImagePaint struct {
 	surface        *C.cairo_surface_t
 	scaleX, scaleY C.double
 	x, y           C.double
 }
 
+// NewCairoImagePaint returns a image element parameters
 func NewCairoImagePaint(x, y, width, height int, image *CairoBitmap) *CairoImagePaint {
 	return &CairoImagePaint{
 		surface: image.surface,
@@ -154,6 +170,7 @@ func NewCairoImagePaint(x, y, width, height int, image *CairoBitmap) *CairoImage
 	}
 }
 
+// Paint paints current element
 func (e *CairoImagePaint) Paint(c *Cairo) {
 	cr := (*C.cairo_t)(c)
 	C.cairo_surface_set_device_scale(e.surface, e.scaleX, e.scaleY)

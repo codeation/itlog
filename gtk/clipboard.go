@@ -8,6 +8,7 @@ import (
 	"unsafe"
 )
 
+// SetClipboardText sets clipboard content
 func SetClipboardText(text string) {
 	data := C.CString(text)
 	defer C.free(unsafe.Pointer(data))
