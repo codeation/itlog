@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime"
 
 	"github.com/codeation/impress/joint/bus"
 	"github.com/codeation/impress/joint/drawrecv"
@@ -12,6 +13,10 @@ import (
 	"github.com/codeation/itlog/gtk"
 	"github.com/codeation/itlog/uiapi"
 )
+
+func init() {
+	runtime.LockOSThread()
+}
 
 func run() error {
 	if len(os.Args) < 2 {
