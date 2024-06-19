@@ -7,8 +7,8 @@ import (
 )
 
 type gtkFramer interface {
-	NewFixed() *gtk.FixedWidget
-	NewDrawingArea() *gtk.DrawingWidget
+	NewFixed() *gtk.Fixed
+	NewDrawingArea() *gtk.Drawing
 	Destroy()
 	Show()
 	Move(x, y int)

@@ -16,7 +16,7 @@ type destroyer interface {
 }
 
 type window struct {
-	gtkDrawing *gtk.DrawingWidget
+	gtkDrawing *gtk.Drawing
 	cgoHandle  *cgo.Handle
 	id         int
 	frameID    int
@@ -27,7 +27,6 @@ type window struct {
 
 func onWindowDraw(cr *gtk.Cairo, h *cgo.Handle) {
 	w := h.Value().(*window)
-	// TODO cairo push/pop
 	for _, paint := range w.painters {
 		paint.Paint(cr)
 	}
@@ -57,7 +56,7 @@ func (u *uiAPI) WindowNew(windowID int, frameID int, x, y, width, height int) {
 	w.gtkDrawing.Show()
 	w.gtkDrawing.SignalDraw(w.cgoHandle)
 
-	//gtk.NotifyWeakRef(w.gtkDrawing.GObject(), u.onWeakRef, uintptr(windowID))
+	//gtk.NotifyWeakRef(w.gtkDrawing.Widget().GObject(), u.onWeakRef, uintptr(windowID))
 }
 
 func (u *uiAPI) WindowDrop(windowID int) {

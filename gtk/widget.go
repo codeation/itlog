@@ -5,181 +5,206 @@ package gtk
 // #include "macro.h"
 import "C"
 
-type container interface {
-	addChild(child *Widget)
-	moveChild(child *Widget, x, y int)
-	raiseChild(child *Widget)
-	NewFixed() *FixedWidget
-	NewDrawingArea() *DrawingWidget
-}
-
 // Widget is a GtkWidget wrapper
 type Widget struct {
-	w              *C.GtkWidget
-	signalHandlers []C.gulong
+	gtkWidget *C.GtkWidget
 }
 
-func newWidget(w *C.GtkWidget) *Widget {
+func newWidget(widget *C.GtkWidget) *Widget {
 	return &Widget{
-		w: w,
+		gtkWidget: widget,
 	}
 }
 
 // GtkWidget returns C.GtkWidget pointer
-func (widget *Widget) GtkWidget() *C.GtkWidget { return widget.w }
-
-// GPointer returns a C.gpointer address
-func (widget *Widget) GPointer() C.gpointer { return C.widgetToGPointer(widget.w) }
+func (widget *Widget) GtkWidget() *C.GtkWidget { return widget.gtkWidget }
 
 // GObject returns C.GObject pointer from widget
-func (widget *Widget) GObject() *C.GObject { return C.widgetToGObject(widget.w) }
+func (widget *Widget) GObject() *C.GObject { return C.widgetToGObject(widget.gtkWidget) }
+
+// type TopWindow contains GtkWindow widget
+type TopWindow struct {
+	widget *Widget
+}
+
+// NewTopWindow creates a WindowWidget
+func (app *Application) NewTopWindow() *TopWindow {
+	return &TopWindow{
+		widget: newWidget(C.gtk_application_window_new(app.GtkApplication())),
+	}
+}
+
+// Widget returns a Widget pointer
+func (window *TopWindow) Widget() *Widget { return window.widget }
 
 // Destroy destroys widget
-func (widget *Widget) Destroy() {
-	for _, signalHandlerID := range widget.signalHandlers {
-		C.g_signal_handler_disconnect(widget.GPointer(), signalHandlerID)
-	}
-	C.gtk_widget_destroy(widget.w)
-}
-
-// Show shows widget
-func (widget *Widget) Show() { C.gtk_widget_show(widget.w) }
-
-func (widget *Widget) size(width, height int) {
-	C.gtk_widget_set_size_request(widget.w, C.int(width), C.int(height))
-}
-
-func (widget *Widget) addChild(child *Widget) {
-	C.gtk_container_add(C.widgetToGtkContainer(widget.w), child.w)
-}
-
-func (widget *Widget) removeChild(child *Widget) {
-	C.gtk_container_remove(C.widgetToGtkContainer(widget.w), child.w)
-}
-
-func (widget *Widget) raiseChild(child *Widget) {
-	C.g_object_ref(child.GPointer())
-	widget.removeChild(child)
-	widget.addChild(child)
-	C.g_object_unref(child.GPointer())
-}
-
-// type WindowWidget contains GtkWindow widget
-type WindowWidget struct {
-	*Widget
-}
-
-// NewWindow creates a WindowWidget
-func (app *Application) NewWindow() *WindowWidget {
-	return &WindowWidget{
-		Widget: newWidget(C.gtk_application_window_new(app.GtkApplication())),
-	}
-}
-
-// GtkWindow returns a C.GtkWindow pointer
-func (widget *WindowWidget) GtkWindow() *C.GtkWindow { return C.widgetToGtkWindow(widget.w) }
+func (window *TopWindow) Destroy() { C.gtk_widget_destroy(window.widget.gtkWidget) }
 
 // ShowAll shows a window with all child widgets
-func (widget *WindowWidget) ShowAll() { C.gtk_widget_show_all(widget.w) }
+func (window *TopWindow) ShowAll() { C.gtk_widget_show_all(window.widget.gtkWidget) }
 
 // Size move and resize application window
-func (widget *WindowWidget) Size(x, y, width, height int) {
-	C.gtk_window_move(widget.GtkWindow(), C.int(x), C.int(y))
-	C.gtk_window_resize(widget.GtkWindow(), C.int(width), C.int(height))
+func (window *TopWindow) Size(x, y, width, height int) {
+	C.gtk_window_move(C.widgetToGtkWindow(window.widget.gtkWidget), C.int(x), C.int(y))
+	C.gtk_window_resize(C.widgetToGtkWindow(window.widget.gtkWidget), C.int(width), C.int(height))
 }
 
-// LayoutWidget contains GtkLayout widget
-type LayoutWidget struct {
-	*Widget
+type container interface {
+	addChild(child *Widget)
+	removeChild(child *Widget)
+	moveChild(child *Widget, x, y int)
+}
+
+func raiseChild(parent container, child *Widget) {
+	C.g_object_ref(C.widgetToGPointer(child.gtkWidget))
+	parent.removeChild(child)
+	parent.addChild(child)
+	C.g_object_unref(C.widgetToGPointer(child.gtkWidget))
+}
+
+// Layout contains GtkLayout widget
+type Layout struct {
+	widget *Widget
+	parent *TopWindow
 }
 
 // NewLayout creates a LayoutWidget
-func (widget *WindowWidget) NewLayout() *LayoutWidget {
-	layout := &LayoutWidget{
-		Widget: newWidget(C.gtk_layout_new(nil, nil)),
+func (window *TopWindow) NewLayout() *Layout {
+	layout := &Layout{
+		widget: newWidget(C.gtk_layout_new(nil, nil)),
+		parent: window,
 	}
-	widget.addChild(layout.Widget)
+	C.gtk_container_add(C.widgetToGtkContainer(window.widget.gtkWidget), layout.widget.gtkWidget)
 	return layout
 }
 
+// Widget returns a Widget pointer
+func (layout *Layout) Widget() *Widget { return layout.widget }
+
+// Destroy destroys widget
+func (layout *Layout) Destroy() { C.gtk_widget_destroy(layout.widget.gtkWidget) }
+
 // NewFixed creates a FixedWidget child
-func (widget *LayoutWidget) NewFixed() *FixedWidget { return newFixedWidget(widget) }
+func (layout *Layout) NewFixed() *Fixed { return newFixed(layout) }
 
 // NewDrawingArea creates a DrawingWidget child
-func (widget *LayoutWidget) NewDrawingArea() *DrawingWidget { return newDrawingArea(widget) }
+func (layout *Layout) NewDrawingArea() *Drawing { return newDrawing(layout) }
+
+// Show shows widget
+func (layout *Layout) Show() { C.gtk_widget_show(layout.widget.gtkWidget) }
 
 // Size resizes widget size
-func (widget *LayoutWidget) Size(width, height int) { widget.size(width, height) }
+func (layout *Layout) Size(width, height int) {}
 
 // Move is a empty method
-func (widget *LayoutWidget) Move(x, y int) {}
+func (layout *Layout) Move(x, y int) {}
 
 // Raise is a empty method
-func (widget *LayoutWidget) Raise() {}
+func (layout *Layout) Raise() {}
 
-func (widget *LayoutWidget) moveChild(child *Widget, x, y int) {
-	C.gtk_layout_move(C.widgetToGtkLayout(widget.w), child.w, C.int(x), C.int(y))
+func (layout *Layout) addChild(child *Widget) {
+	C.gtk_container_add(C.widgetToGtkContainer(layout.widget.gtkWidget), child.gtkWidget)
 }
 
-// type FixedWidget contains GtkFixed widget
-type FixedWidget struct {
-	*Widget
+func (layout *Layout) removeChild(child *Widget) {
+	C.gtk_container_remove(C.widgetToGtkContainer(layout.widget.gtkWidget), child.gtkWidget)
+}
+
+func (layout *Layout) moveChild(child *Widget, x, y int) {
+	C.gtk_layout_move(C.widgetToGtkLayout(layout.widget.gtkWidget), child.gtkWidget, C.int(x), C.int(y))
+}
+
+// type Fixed contains GtkFixed widget
+type Fixed struct {
+	widget *Widget
 	parent container
 }
 
-func newFixedWidget(parent container) *FixedWidget {
-	fixed := &FixedWidget{
-		Widget: newWidget(C.gtk_fixed_new()),
+func newFixed(parent container) *Fixed {
+	fixed := &Fixed{
+		widget: newWidget(C.gtk_fixed_new()),
 		parent: parent,
 	}
-	parent.addChild(fixed.Widget)
+	parent.addChild(fixed.widget)
 	return fixed
 }
 
+// Widget returns a Widget pointer
+func (fixed *Fixed) Widget() *Widget { return fixed.widget }
+
+// Destroy destroys widget
+func (fixed *Fixed) Destroy() { C.gtk_widget_destroy(fixed.widget.gtkWidget) }
+
 // NewFixed creates a FixedWidget child
-func (widget *FixedWidget) NewFixed() *FixedWidget { return newFixedWidget(widget) }
+func (fixed *Fixed) NewFixed() *Fixed { return newFixed(fixed) }
 
 // NewDrawingArea creates a DrawingWidget child
-func (widget *FixedWidget) NewDrawingArea() *DrawingWidget { return newDrawingArea(widget) }
+func (fixed *Fixed) NewDrawingArea() *Drawing { return newDrawing(fixed) }
+
+// Show shows widget
+func (fixed *Fixed) Show() { C.gtk_widget_show(fixed.widget.gtkWidget) }
 
 // Size resizes widget size
-func (widget *FixedWidget) Size(width, height int) { widget.size(width, height) }
+func (fixed *Fixed) Size(width, height int) {
+	C.gtk_widget_set_size_request(fixed.widget.gtkWidget, C.int(width), C.int(height))
+}
 
 // Move shifts widget to a new coordinates
-func (widget *FixedWidget) Move(x, y int) { widget.parent.moveChild(widget.Widget, x, y) }
+func (fixed *Fixed) Move(x, y int) { fixed.parent.moveChild(fixed.widget, x, y) }
 
 // Raise raises widget
-func (widget *FixedWidget) Raise() { widget.parent.raiseChild(widget.Widget) }
+func (fixed *Fixed) Raise() { raiseChild(fixed.parent, fixed.widget) }
 
-func (widget *FixedWidget) moveChild(child *Widget, x, y int) {
-	C.gtk_fixed_move(C.widgetToGtkFixed(widget.w), child.w, C.int(x), C.int(y))
+func (fixed *Fixed) addChild(child *Widget) {
+	C.gtk_container_add(C.widgetToGtkContainer(fixed.widget.gtkWidget), child.gtkWidget)
 }
 
-// DrawingWidget contains DrawingArea widget
-type DrawingWidget struct {
-	*Widget
-	parent container
+func (fixed *Fixed) removeChild(child *Widget) {
+	C.gtk_container_remove(C.widgetToGtkContainer(fixed.widget.gtkWidget), child.gtkWidget)
 }
 
-func newDrawingArea(parent container) *DrawingWidget {
-	drawing := &DrawingWidget{
-		Widget: newWidget(C.gtk_drawing_area_new()),
+func (fixed *Fixed) moveChild(child *Widget, x, y int) {
+	C.gtk_fixed_move(C.widgetToGtkFixed(fixed.widget.gtkWidget), child.gtkWidget, C.int(x), C.int(y))
+}
+
+// Drawing contains DrawingArea widget
+type Drawing struct {
+	widget      *Widget
+	drawHandler C.gulong
+	parent      container
+}
+
+func newDrawing(parent container) *Drawing {
+	drawing := &Drawing{
+		widget: newWidget(C.gtk_drawing_area_new()),
 		parent: parent,
 	}
-	parent.addChild(drawing.Widget)
+	parent.addChild(drawing.widget)
 	return drawing
 }
 
+// Widget returns a Widget pointer
+func (drawing *Drawing) Widget() *Widget { return drawing.widget }
+
+// Destroy destroys widget
+func (drawing *Drawing) Destroy() {
+	C.g_signal_handler_disconnect(C.widgetToGPointer(drawing.widget.gtkWidget), drawing.drawHandler)
+	C.gtk_widget_destroy(drawing.widget.gtkWidget)
+}
+
+// Show shows widget
+func (drawing *Drawing) Show() { C.gtk_widget_show(drawing.widget.gtkWidget) }
+
 // Size resizes widget size
-func (widget *DrawingWidget) Size(width, height int) { widget.size(width, height) }
+func (drawing *Drawing) Size(width, height int) {
+	C.gtk_widget_set_size_request(drawing.widget.gtkWidget, C.int(width), C.int(height))
+}
 
 // Move shifts widget to a new coordinates
-func (widget *DrawingWidget) Move(x, y int) { widget.parent.moveChild(widget.Widget, x, y) }
+func (drawing *Drawing) Move(x, y int) { drawing.parent.moveChild(drawing.widget, x, y) }
 
 // Raise raises widget
-func (widget *DrawingWidget) Raise() { widget.parent.raiseChild(widget.Widget) }
+func (drawing *Drawing) Raise() { raiseChild(drawing.parent, drawing.widget) }
 
 // QueueDraw marks a widget to redrawing
-func (widget *DrawingWidget) QueueDraw() {
-	C.gtk_widget_queue_draw(widget.w)
-}
+func (drawing *Drawing) QueueDraw() { C.gtk_widget_queue_draw(drawing.widget.gtkWidget) }

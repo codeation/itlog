@@ -25,10 +25,9 @@ type MenuItem struct {
 
 // MenuAction is a GSimpleAction wrapper
 type MenuAction struct {
-	simpleAction   *C.GSimpleAction
-	action         *C.char
-	alias          *C.char
-	signalHandlers []C.gulong
+	simpleAction *C.GSimpleAction
+	action       *C.char
+	alias        *C.char
 }
 
 // NewMenu creates application menu

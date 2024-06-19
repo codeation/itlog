@@ -23,10 +23,10 @@ type GdkEventScroll C.GdkEventScroll
 var layoutOffsetX, layoutOffsetY C.int
 
 // GdkConfigure returns application width, height and inner rectange width, height
-func GdkConfigure(allocation *GtkAllocation, top *WindowWidget) (int, int, int, int) {
+func GdkConfigure(allocation *GtkAllocation, top *TopWindow) (int, int, int, int) {
 	layoutOffsetX, layoutOffsetY = allocation.x, allocation.y
 	var width, height C.gint
-	C.gtk_window_get_size(top.GtkWindow(), &width, &height)
+	C.gtk_window_get_size(C.widgetToGtkWindow(top.Widget().GtkWidget()), &width, &height)
 	return int(width), int(height), int(allocation.width), int(allocation.height)
 }
 

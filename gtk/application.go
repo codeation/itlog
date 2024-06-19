@@ -11,8 +11,7 @@ import (
 
 // Application is a GtkApplication wrapper
 type Application struct {
-	a              *C.GtkApplication
-	signalHandlers []C.gulong
+	a *C.GtkApplication
 }
 
 // NewApplication creates Application
@@ -39,9 +38,6 @@ func (app *Application) GPointer() C.gpointer { return C.appToGPointer(app.a) }
 
 // Quit quits application
 func (app *Application) Quit() {
-	for _, signalHandlerID := range app.signalHandlers {
-		C.g_signal_handler_disconnect(app.GPointer(), signalHandlerID)
-	}
 	C.g_application_quit(app.GApplication())
 }
 

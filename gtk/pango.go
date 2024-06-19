@@ -127,8 +127,8 @@ func (f *FontSelection) Free() {
 }
 
 // Metrics returns font selection lineheight, baseline, ascent, descent
-func (f *FontSelection) Metrics(top *WindowWidget) (int, int, int, int) {
-	top_pango_context := C.gtk_widget_get_pango_context(top.w)
+func (f *FontSelection) Metrics(top *TopWindow) (int, int, int, int) {
+	top_pango_context := C.gtk_widget_get_pango_context(top.Widget().GtkWidget())
 	layout := C.pango_layout_new(top_pango_context)
 	C.pango_layout_set_font_description(layout, f.desc)
 	baseline := int(float64(C.pango_layout_get_baseline(layout)) / float64(C.PANGO_SCALE))
@@ -142,8 +142,8 @@ func (f *FontSelection) Metrics(top *WindowWidget) (int, int, int, int) {
 }
 
 // Split splits text string to substrings
-func (f *FontSelection) Split(top *WindowWidget, text string, edge, indent int) []int {
-	top_pango_context := C.gtk_widget_get_pango_context(top.w)
+func (f *FontSelection) Split(top *TopWindow, text string, edge, indent int) []int {
+	top_pango_context := C.gtk_widget_get_pango_context(top.Widget().GtkWidget())
 	layout := C.pango_layout_new(top_pango_context)
 	C.pango_layout_set_font_description(layout, f.desc)
 	C.pango_layout_set_wrap(layout, C.PANGO_WRAP_WORD_CHAR)
@@ -161,8 +161,8 @@ func (f *FontSelection) Split(top *WindowWidget, text string, edge, indent int) 
 }
 
 // Size returns text string width and height in pixels
-func (f *FontSelection) Size(top *WindowWidget, text string) (int, int) {
-	top_pango_context := C.gtk_widget_get_pango_context(top.w)
+func (f *FontSelection) Size(top *TopWindow, text string) (int, int) {
+	top_pango_context := C.gtk_widget_get_pango_context(top.Widget().GtkWidget())
 	layout := C.pango_layout_new(top_pango_context)
 	C.pango_layout_set_font_description(layout, f.desc)
 	cText := C.CString(text)
