@@ -24,6 +24,9 @@ gboolean scroll_notify(GtkEventControllerScroll *self, gdouble dx, gdouble dy, g
 // SimpleAction
 void menu_item_activate(GSimpleAction *action, GVariant *parameter, gpointer data);
 
+// Clipboard
+void clipboard_text_received(GObject *source_object, GAsyncResult *res, gpointer data);
+
 // Misc
 void object_weak_notify(gpointer data, GObject *where_the_object_was);
 

@@ -101,6 +101,14 @@ void menu_item_activate(GSimpleAction *action, GVariant *parameter, gpointer dat
     menuItemActivate(action, parameter, data);
 }
 
+/* Clipboard */
+
+void clipboardTextReceived(GObject *source_object, GAsyncResult *res, gpointer data);
+
+void clipboard_text_received(GObject *source_object, GAsyncResult *res, gpointer data) {
+    clipboardTextReceived(source_object, res, data);
+}
+
 /* Misc */
 
 void objectWeakRef(gpointer data, GObject *where_the_object_was);

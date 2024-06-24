@@ -62,8 +62,7 @@ func (u *uiAPI) ApplicationExit() {
 func (u *uiAPI) ApplicationVersion() string { return itlogVersion }
 
 func (u *uiAPI) ClipboardGet(typeID int) {
-	text := gtk4.RequestClipboardText(u.top)
-	u.callbacks.EventClipboard(typeID, []byte(text))
+	gtk4.RequestClipboardText(u.onClipboardText)
 }
 
 func (u *uiAPI) ClipboardPut(typeID int, data []byte) {

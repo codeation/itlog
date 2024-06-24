@@ -41,4 +41,8 @@ func (u *uiAPI) onSizeAllocate(allocation *gtk4.GtkAllocation) {
 	u.callbacks.EventConfigure(width, height, innerWidth, innerHeight)
 }
 
+func (u *uiAPI) onClipboardText(text string) {
+	u.callbacks.EventClipboard(textClipboardFormat, []byte(text))
+}
+
 //func (u *uiAPI) onWeakRef(data uintptr) { fmt.Println("WeakRef", int(data)) }

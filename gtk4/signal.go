@@ -260,6 +260,19 @@ func (action *MenuAction) SignalMenuItemActivate(h *cgo.Handle) {
 	gSignalConnect(action.GObject(), "activate", C.GCallback(C.menu_item_activate), C.gpointer(h))
 }
 
+//export clipboardTextReceived
+func clipboardTextReceived(source_object *C.GObject, res *C.GAsyncResult, data C.gpointer) {
+	text := C.gdk_clipboard_read_text_finish(C.objectToGdkClipboard(source_object), res, nil)
+	clipboardFn(C.GoString(text))
+}
+
+// RequestClipboardText connects a callback for clipboard receiving
+func RequestClipboardText(callback func(text string)) {
+	clipboardFn = callback
+	clipboard := C.gdk_display_get_primary_clipboard(C.gdk_display_get_default())
+	C.gdk_clipboard_read_text_async(clipboard, nil, C.GCallback(C.clipboard_text_received), nil)
+}
+
 //export objectWeakRef
 func objectWeakRef(data C.gpointer, where_the_object_was *C.GObject) {
 	weakRefFn(uintptr(data))

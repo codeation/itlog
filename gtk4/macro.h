@@ -42,6 +42,8 @@ inline GtkEventController *motionToEventController(GtkEventControllerMotion *c) 
 
 inline GtkGestureSingle *gestureToGestureSingle(GtkGesture *c) { return GTK_GESTURE_SINGLE(c); }
 
+inline GdkClipboard *objectToGdkClipboard(GObject *o) { return GDK_CLIPBOARD(o); }
+
 inline gulong GSignalConnect(GObject *instance, const gchar *detailed_signal, GCallback c_handler, gpointer data) {
     return g_signal_connect_data(instance, detailed_signal, c_handler, data, NULL, 0);
 }
