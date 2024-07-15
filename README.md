@@ -46,4 +46,4 @@ Steps 0-2 are needed to build a Cgo version of impress terminal.
 ### Notes
 
 - The project is currently in its beta stage.
-- The project tested on Debian 12.5.
+- The project tested on Debian 12.6.
