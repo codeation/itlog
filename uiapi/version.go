@@ -1,3 +1,3 @@
 package uiapi
 
-const itlogVersion = "0.4.6"
+const itlogVersion = "0.5.0"
