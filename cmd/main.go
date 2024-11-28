@@ -9,6 +9,7 @@ import (
 
 	"github.com/codeation/impress/joint/bus"
 	"github.com/codeation/impress/joint/drawrecv"
+	"github.com/codeation/impress/joint/drawwait"
 	"github.com/codeation/impress/joint/eventsend"
 	"github.com/codeation/itlog/gtk"
 	"github.com/codeation/itlog/uiapi"
@@ -33,12 +34,13 @@ func run() error {
 
 	e := eventsend.New(client.EventPipe)
 	dom := uiapi.New(e)
-	d := drawrecv.NewDrawCommand(dom, client.StreamPipe, client.SyncPipe)
+	s := drawwait.NewStreamCommand(dom, client.StreamFile())
+	d := drawrecv.NewSyncCommand(dom, client.StreamPipe, client.SyncPipe)
 
 	var streamIO *gtk.WatchIO
 	streamIO, err = gtk.NewStreamIO(client.StreamFile(), func() {
-		if err := d.StreamCommand(); err != nil {
-			if errors.Is(err, drawrecv.ErrPipeClosing) {
+		if err := s.StreamCommand(); err != nil {
+			if errors.Is(err, drawwait.ErrPipeClosing) {
 				streamIO.Done()
 				return
 			}
