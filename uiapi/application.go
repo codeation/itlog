@@ -59,7 +59,7 @@ func (u *uiAPI) ApplicationExit() {
 	}
 }
 
-func (u *uiAPI) ApplicationVersion() string { return itlogVersion }
+func (u *uiAPI) ApplicationVersion() string { return logAPIVersion }
 
 func (u *uiAPI) ClipboardGet(typeID int) {
 	gtk.RequestClipboardText(u.onClipboardText)

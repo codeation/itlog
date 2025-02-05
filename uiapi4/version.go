@@ -1,3 +1,3 @@
 package uiapi4
 
-const itlogVersion = "0.5.1"
+const logAPIVersion = "api-6"
