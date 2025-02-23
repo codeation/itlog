@@ -16,11 +16,11 @@ func (u *uiAPI) FontNew(fontID int, height int, style, variant, weight, stretch 
 	f := &font{
 		id:        fontID,
 		height:    height,
-		selection: gtk.NewFontSelection(height, family, style, variant, weight, stretch),
+		selection: gtk.NewFontSelection(height, family, style, variant, weight, stretch, u.top),
 	}
 	u.fonts[fontID] = f
 
-	return f.selection.Metrics(u.top)
+	return f.selection.Metrics()
 }
 
 func (u *uiAPI) FontDrop(fontID int) {
@@ -41,7 +41,7 @@ func (u *uiAPI) FontSplit(fontID int, text string, edge, indent int) []int {
 		return nil
 	}
 
-	return f.selection.Split(u.top, text, edge, indent)
+	return f.selection.Split(text, edge, indent)
 }
 
 func (u *uiAPI) FontSize(fontID int, text string) (int, int) {
@@ -51,5 +51,5 @@ func (u *uiAPI) FontSize(fontID int, text string) (int, int) {
 		return 0, 0
 	}
 
-	return f.selection.Size(u.top, text)
+	return f.selection.Size(text)
 }

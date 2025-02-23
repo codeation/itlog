@@ -78,7 +78,6 @@ func (e *CairoLinePaint) Paint(c *Cairo) {
 // CairoTextPaint is a text element parameters
 type CairoTextPaint struct {
 	layout     *C.PangoLayout
-	desc       *C.PangoFontDescription
 	text       *C.char
 	x, y       C.double
 	r, g, b, a C.double
@@ -87,25 +86,21 @@ type CairoTextPaint struct {
 // NewCairoTextPaint returns a text element parameters
 func NewCairoTextPaint(x, y int, r, g, b, a uint16, font *FontSelection, text string) *CairoTextPaint {
 	return &CairoTextPaint{
-		desc: font.desc,
-		text: C.CString(text),
-		x:    C.double(x),
-		y:    C.double(y),
-		r:    C.double(r) / C.double(0xFFFF),
-		g:    C.double(g) / C.double(0xFFFF),
-		b:    C.double(b) / C.double(0xFFFF),
-		a:    C.double(a) / C.double(0xFFFF),
+		layout: font.layout,
+		text:   C.CString(text),
+		x:      C.double(x),
+		y:      C.double(y),
+		r:      C.double(r) / C.double(0xFFFF),
+		g:      C.double(g) / C.double(0xFFFF),
+		b:      C.double(b) / C.double(0xFFFF),
+		a:      C.double(a) / C.double(0xFFFF),
 	}
 }
 
 // Paint paints current element
 func (e *CairoTextPaint) Paint(c *Cairo) {
 	cr := (*C.cairo_t)(c)
-	if e.layout == nil {
-		e.layout = C.pango_cairo_create_layout(cr)
-		C.pango_layout_set_font_description(e.layout, e.desc)
-		C.pango_layout_set_text(e.layout, e.text, -1)
-	}
+	C.pango_layout_set_text(e.layout, e.text, -1)
 	C.cairo_set_source_rgba(cr, e.r, e.g, e.b, e.a)
 	C.cairo_move_to(cr, e.x, e.y)
 	C.pango_cairo_show_layout(cr, e.layout)
@@ -114,9 +109,6 @@ func (e *CairoTextPaint) Paint(c *Cairo) {
 // Destroy destroys current element
 func (e *CairoTextPaint) Destroy() {
 	C.free(unsafe.Pointer(e.text))
-	if e.layout != nil {
-		C.g_object_unref(C.layoutToGPointer(e.layout))
-	}
 }
 
 // CairoBitmap is a cairo_surface_t wrapper
@@ -130,9 +122,9 @@ type CairoBitmap struct {
 func NewCairoBitmap(data []byte, width, height int) *CairoBitmap {
 	const cFormat = C.CAIRO_FORMAT_ARGB32
 	stride := int(C.cairo_format_stride_for_width(cFormat, C.int(width)))
-	for i := 0; i < height; i++ {
+	for i := range height {
 		offset := i * stride
-		for j := 0; j < width; j++ {
+		for j := range width {
 			data[offset+j*4+0], data[offset+j*4+2] = data[offset+j*4+2], data[offset+j*4+0]
 		}
 	}
