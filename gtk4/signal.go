@@ -17,7 +17,7 @@ var (
 	menuActionFn    func(h *cgo.Handle)
 	drawFn          func(cr *Cairo, h *cgo.Handle)
 	deleteFn        func()
-	sizeAllocateFn  func(allocation *GtkAllocation)
+	sizeAllocateFn  func(width int, height int)
 	keyPressFn      func(event *GdkEventKey)
 	buttonPressFn   func(event *GdkEventButton)
 	buttonReleaseFn func(event *GdkEventButton)
@@ -88,16 +88,16 @@ var sizeWidget *C.GtkWidget
 
 //export widgetIdle
 func widgetIdle(user_data C.gpointer) {
-	var allocation C.GtkAllocation
-	C.gtk_widget_get_allocation(sizeWidget, &allocation)
-	if allocation.width == 0 && allocation.height == 0 {
+	width := int(C.gtk_widget_get_width(sizeWidget))
+	height := int(C.gtk_widget_get_height(sizeWidget))
+	if width == 0 && height == 0 {
 		return
 	}
-	sizeAllocateFn((*GtkAllocation)(&allocation))
+	sizeAllocateFn(width, height)
 }
 
 // SignalSizeAllocate connects a callback for "size-allocate" event
-func (layout *Layout) SignalSizeAllocate(callback func(allocation *GtkAllocation)) {
+func (layout *Layout) SignalSizeAllocate(callback func(width int, height int)) {
 	sizeWidget = layout.scrolled
 	sizeAllocateFn = callback
 	gSignalConnect(layout.parent.Widget().GObject(), "notify::default-width", C.GCallback(C.size_notify), nil)

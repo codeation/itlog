@@ -31,8 +31,8 @@ func (u *uiAPI) onScroll(event *gtk4.GdkEventScroll) {
 
 var prevWidth, prevHeight, prevInnerWidth, prevInnerHeight int
 
-func (u *uiAPI) onSizeAllocate(allocation *gtk4.GtkAllocation) {
-	width, height, innerWidth, innerHeight := gtk4.GdkConfigure(allocation, u.top)
+func (u *uiAPI) onSizeAllocate(innerWidth int, innerHeight int) {
+	width, height := gtk4.GdkConfigure(u.top)
 	if width == prevWidth && height == prevHeight &&
 		innerWidth == prevInnerWidth && innerHeight == prevInnerHeight {
 		return

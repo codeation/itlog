@@ -110,8 +110,8 @@ func (layout *Layout) NewDrawingArea() *Drawing { return newDrawing(layout) }
 
 // Show shows widget
 func (layout *Layout) Show() {
-	C.gtk_widget_show(layout.scrolled)
-	C.gtk_widget_show(layout.widget.gtkWidget)
+	C.gtk_widget_set_visible(layout.scrolled, 1)         // true
+	C.gtk_widget_set_visible(layout.widget.gtkWidget, 1) // true
 }
 
 // Size resizes widget size
@@ -164,7 +164,7 @@ func (fixed *Fixed) NewFixed() *Fixed { return newFixed(fixed) }
 func (fixed *Fixed) NewDrawingArea() *Drawing { return newDrawing(fixed) }
 
 // Show shows widget
-func (fixed *Fixed) Show() { C.gtk_widget_show(fixed.widget.gtkWidget) }
+func (fixed *Fixed) Show() { C.gtk_widget_set_visible(fixed.widget.gtkWidget, 1) /* true */ }
 
 // Size resizes widget size
 func (fixed *Fixed) Size(width, height int) {
@@ -211,7 +211,7 @@ func (drawing *Drawing) Widget() *Widget { return drawing.widget }
 func (drawing *Drawing) Destroy() { C.gtk_widget_unparent(drawing.widget.gtkWidget) }
 
 // Show shows widget
-func (drawing *Drawing) Show() { C.gtk_widget_show(drawing.widget.gtkWidget) }
+func (drawing *Drawing) Show() { C.gtk_widget_set_visible(drawing.widget.gtkWidget, 1) /* true */ }
 
 // Size resizes widget size
 func (drawing *Drawing) Size(width, height int) {

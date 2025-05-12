@@ -36,12 +36,12 @@ type GdkEventScroll struct {
 	DX, DY    C.double
 }
 
-// GdkConfigure returns application width, height and inner rectange width, height
-func GdkConfigure(allocation *GtkAllocation, top *TopWindow) (int, int, int, int) {
+// GdkConfigure returns application width, height
+func GdkConfigure(top *TopWindow) (int, int) {
 	//layoutOffsetX, layoutOffsetY = allocation.x, allocation.y
 	var width, height C.gint
 	C.gtk_window_get_default_size(C.widgetToGtkWindow(top.Widget().GtkWidget()), &width, &height)
-	return int(width), int(height), int(allocation.width), int(allocation.height)
+	return int(width), int(height)
 }
 
 // GdkKey returns key rune, shift, control, alt, meta statuses and key name
