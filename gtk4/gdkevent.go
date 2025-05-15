@@ -27,6 +27,7 @@ type GdkEventButton struct {
 type GdkEventMotion struct {
 	Event *C.GdkEvent
 	X, Y  C.double
+	State C.GdkModifierType
 }
 
 // GdkEventScroll is a scroll event parameters
@@ -63,7 +64,11 @@ func GdkButton(event *GdkEventButton) (int, int, int, int) {
 
 // GdkMotion returns x, y of mouse motion event, shift, control, alt, meta statuses
 func GdkMotion(event *GdkEventMotion) (int, int, bool, bool, bool, bool) {
-	return int(event.X), int(event.Y), false, false, false, false
+	shift := event.State&C.GDK_SHIFT_MASK != 0
+	control := event.State&C.GDK_CONTROL_MASK != 0
+	alt := event.State&C.GDK_ALT_MASK != 0
+	meta := event.State&C.GDK_META_MASK != 0
+	return int(event.X), int(event.Y), shift, control, alt, meta
 }
 
 // GdkScroll returns scroll direction, deltaX, deltaY of scroll event

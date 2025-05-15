@@ -78,7 +78,6 @@ func (u *uiAPI) onStartup() {
 func (u *uiAPI) onActivate() {
 	u.top = u.app.NewTopWindow()
 	u.top.Widget().SignalDelete(u.onDelete)
-	u.top.Widget().SignalKeyPress(u.onKeyPress)
 }
 
 func (u *uiAPI) onShutdown() {

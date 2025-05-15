@@ -39,6 +39,7 @@ func (u *uiAPI) FrameNew(frameID int, parentFrameID int, x, y, width, height int
 		f.gtkFrame = layout
 		u.top.ShowAll()
 		layout.SignalSizeAllocate(u.onSizeAllocate)
+		layout.SignalKeyPress(u.onKeyPress)
 		layout.Widget().SignalButtonPress(u.onButtonPress)
 		layout.Widget().SignalButtonRelease(u.onButtonPress)
 		layout.Widget().SignalMotionNotify(u.onMotionNotify)

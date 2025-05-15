@@ -105,9 +105,6 @@ func (layout *Layout) SignalSizeAllocate(callback func(width int, height int)) {
 	gSignalConnect(C.adjustmentToGObject(layout.adjustment), "changed", C.GCallback(C.adjustment_notify), nil)
 	gSignalConnect(C.adjustmentToGObject(layout.adjustment), "value-changed", C.GCallback(C.adjustment_notify), nil)
 	C.size_notify_init()
-	keyEventController := C.gtk_event_controller_key_new()
-	gSignalConnect(C.controllerToGObject(keyEventController), "key-pressed", C.GCallback(C.key_pressed), nil)
-	C.gtk_widget_add_controller(layout.scrolled, keyEventController)
 }
 
 //export widgetKeyPress
@@ -123,11 +120,11 @@ func widgetKeyPress(self *C.GtkEventControllerKey, keyval C.guint, keycode C.gui
 }
 
 // SignalKeyPress connects a callback for "key_press_event" event
-func (widget *Widget) SignalKeyPress(callback func(event *GdkEventKey)) {
+func (layout *Layout) SignalKeyPress(callback func(event *GdkEventKey)) {
 	keyPressFn = callback
 	keyEventController := C.gtk_event_controller_key_new()
 	gSignalConnect(C.controllerToGObject(keyEventController), "key-pressed", C.GCallback(C.key_pressed), nil)
-	C.gtk_widget_add_controller(widget.gtkWidget, keyEventController)
+	C.gtk_widget_add_controller(layout.scrolled, keyEventController)
 }
 
 var prevButtonTime C.guint32
@@ -197,6 +194,7 @@ func (widget *Widget) SignalButtonRelease(callback func(event *GdkEventButton)) 
 	C.gtk_gesture_single_set_button(C.gestureToGestureSingle(getstureConroller), 0)
 	C.gtk_gesture_single_set_touch_only(C.gestureToGestureSingle(getstureConroller), 0) // false
 	gSignalConnect(C.gestureToGObject(getstureConroller), "released", C.GCallback(C.button_released), nil)
+	gSignalConnect(C.gestureToGObject(getstureConroller), "unpaired-release", C.GCallback(C.button_released), nil)
 	C.gtk_widget_add_controller(widget.gtkWidget, C.gestureToEventController(getstureConroller))
 }
 
@@ -212,6 +210,7 @@ func widgetMotionNotify(self *C.GtkEventControllerMotion, x C.gdouble, y C.gdoub
 		Event: event,
 		X:     x,
 		Y:     y,
+		State: C.gdk_event_get_modifier_state(event),
 	}
 	motionNotifyFn(motionEvent)
 }
