@@ -3,10 +3,6 @@
 
 /* Application */
 
-void appStartup(GApplication *application, gpointer data);
-
-void app_startup(GApplication *application, gpointer data) { appStartup(application, data); }
-
 void appActivate(GApplication *application, gpointer data);
 
 void app_activate(GApplication *application, gpointer data) { appActivate(application, data); }

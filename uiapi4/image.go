@@ -3,16 +3,16 @@ package uiapi4
 import (
 	"log"
 
-	"github.com/codeation/itlog/gtk4"
+	gtk "github.com/codeation/itlog/gtk4"
 )
 
 type image struct {
-	bitmap *gtk4.CairoBitmap
+	bitmap *gtk.CairoBitmap
 }
 
 func (u *uiAPI) ImageNew(imageID int, width, height int, bitmap []byte) {
 	u.images[imageID] = &image{
-		bitmap: gtk4.NewCairoBitmap(bitmap, width, height),
+		bitmap: gtk.NewCairoBitmap(bitmap, width, height),
 	}
 }
 

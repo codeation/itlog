@@ -3,13 +3,13 @@
 
 #include <gtk/gtk.h>
 
-inline GApplication *appToGApplication(GtkApplication *app) { return G_APPLICATION(app); }
+inline GApplication *applicationToGApplication(GtkApplication *app) { return G_APPLICATION(app); }
 
-inline GObject *appToGObject(GtkApplication *app) { return G_OBJECT(app); }
+inline GObject *applicationToGObject(GtkApplication *app) { return G_OBJECT(app); }
 inline GObject *widgetToGObject(GtkWidget *widget) { return G_OBJECT(widget); }
 inline GObject *simpleToGObject(GSimpleAction *simpleAction) { return G_OBJECT(simpleAction); }
 
-inline gpointer appToGPointer(GtkApplication *app) { return app; }
+inline gpointer applicationToGPointer(GtkApplication *app) { return app; }
 inline gpointer widgetToGPointer(GtkWidget *widget) { return widget; }
 inline gpointer layoutToGPointer(PangoLayout *layout) { return layout; }
 inline gpointer menuToGPointer(GMenu *menu) { return menu; }
@@ -17,7 +17,7 @@ inline gpointer menuItemToGPointer(GMenuItem *item) { return item; }
 
 inline GAction *simpleToGAction(GSimpleAction *simpleAction) { return G_ACTION(simpleAction); }
 
-inline GActionMap *appToGActionMap(GtkApplication *app) { return G_ACTION_MAP(app); }
+inline GActionMap *applicationToGActionMap(GtkApplication *app) { return G_ACTION_MAP(app); }
 
 inline GMenuModel *menuToGMenuModel(GMenu *menu) { return G_MENU_MODEL(menu); }
 

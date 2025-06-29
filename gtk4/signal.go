@@ -11,54 +11,32 @@ import (
 )
 
 var (
-	startupFn       func()
-	activateFn      func()
-	shutdownFn      func()
-	menuActionFn    func(h *cgo.Handle)
-	drawFn          func(cr *Cairo, h *cgo.Handle)
-	deleteFn        func()
-	sizeAllocateFn  func(width int, height int)
-	keyPressFn      func(event *GdkEventKey)
-	buttonPressFn   func(event *GdkEventButton)
-	buttonReleaseFn func(event *GdkEventButton)
-	motionNotifyFn  func(event *GdkEventMotion)
-	scrollFn        func(event *GdkEventScroll)
-	clipboardFn     func(text string)
-	weakRefFn       func(data uintptr)
+	activateFn      = func() {}
+	shutdownFn      = func() {}
+	menuActionFn    = func(h *cgo.Handle) {}
+	drawFn          = func(cr *Cairo, h *cgo.Handle) {}
+	deleteFn        = func() {}
+	sizeAllocateFn  = func(width int, height int) {}
+	keyPressFn      = func(event *GdkEventKey) {}
+	buttonPressFn   = func(event *GdkEventButton) {}
+	buttonReleaseFn = func(event *GdkEventButton) {}
+	motionNotifyFn  = func(event *GdkEventMotion) {}
+	scrollFn        = func(event *GdkEventScroll) {}
+	clipboardFn     = func(text string) {}
+	weakRefFn       = func(data uintptr) {}
 )
-
-func gSignalConnect(instance *C.GObject, signal string, handler C.GCallback, data C.gpointer) C.gulong {
-	name := C.CString(signal)
-	defer C.free(unsafe.Pointer(name))
-	return C.GSignalConnect(instance, name, handler, data)
-}
-
-//export appStartup
-func appStartup(application *C.GApplication, data C.gpointer) { startupFn() }
-
-// SignalStartup connects a callback for "startup" event
-func (app *Application) SignalStartup(callback func()) {
-	startupFn = callback
-	gSignalConnect(app.GObject(), "startup", C.GCallback(C.app_startup), nil)
-}
 
 //export appActivate
 func appActivate(application *C.GApplication, data C.gpointer) { activateFn() }
 
 // SignalActivate connects a callback for "activate" event
-func (app *Application) SignalActivate(callback func()) {
-	activateFn = callback
-	gSignalConnect(app.GObject(), "activate", C.GCallback(C.app_activate), nil)
-}
+func SignalActivate(callback func()) { activateFn = callback }
 
 //export appShutdown
 func appShutdown(application *C.GApplication, data C.gpointer) { shutdownFn() }
 
 // SignalShutdown connects a callback for "shutdown" event
-func (app *Application) SignalShutdown(callback func()) {
-	shutdownFn = callback
-	gSignalConnect(app.GObject(), "shutdown", C.GCallback(C.app_shutdown), nil)
-}
+func SignalShutdown(callback func()) { shutdownFn = callback }
 
 //export windowDraw
 func windowDraw(widget *C.GtkWidget, cr *C.cairo_t, data C.gpointer) {
@@ -66,23 +44,13 @@ func windowDraw(widget *C.GtkWidget, cr *C.cairo_t, data C.gpointer) {
 }
 
 // SignalDrawCallback connects a callback for "draw" event
-func SignalDrawCallback(callback func(cr *Cairo, h *cgo.Handle)) {
-	drawFn = callback
-}
-
-// SignalDraw connects a callback parameters for "draw" event
-func (drawing *Drawing) SignalDraw(h *cgo.Handle) {
-	C.gtk_drawing_area_set_draw_func(C.widgetToGtkDrawingArea(drawing.Widget().GtkWidget()), C.GCallback(C.window_draw), C.gpointer(h), nil)
-}
+func SignalDrawCallback(callback func(cr *Cairo, h *cgo.Handle)) { drawFn = callback }
 
 //export widgetDelete
 func widgetDelete(self *C.GtkWindow, user_data C.gpointer) { deleteFn() }
 
 // SignalDelete connects a callback for "delete-event" event
-func (widget *Widget) SignalDelete(callback func()) {
-	deleteFn = callback
-	gSignalConnect(widget.GObject(), "close-request", C.GCallback(C.close_request), nil)
-}
+func SignalDelete(callback func()) { deleteFn = callback }
 
 var sizeWidget *C.GtkWidget
 
@@ -97,15 +65,7 @@ func widgetIdle(user_data C.gpointer) {
 }
 
 // SignalSizeAllocate connects a callback for "size-allocate" event
-func (layout *Layout) SignalSizeAllocate(callback func(width int, height int)) {
-	sizeWidget = layout.scrolled
-	sizeAllocateFn = callback
-	gSignalConnect(layout.parent.Widget().GObject(), "notify::default-width", C.GCallback(C.size_notify), nil)
-	gSignalConnect(layout.parent.Widget().GObject(), "notify::default-height", C.GCallback(C.size_notify), nil)
-	gSignalConnect(C.adjustmentToGObject(layout.adjustment), "changed", C.GCallback(C.adjustment_notify), nil)
-	gSignalConnect(C.adjustmentToGObject(layout.adjustment), "value-changed", C.GCallback(C.adjustment_notify), nil)
-	C.size_notify_init()
-}
+func SignalSizeAllocate(callback func(width int, height int)) { sizeAllocateFn = callback }
 
 //export widgetKeyPress
 func widgetKeyPress(self *C.GtkEventControllerKey, keyval C.guint, keycode C.guint, state C.GdkModifierType, user_data C.gpointer) {
@@ -120,12 +80,7 @@ func widgetKeyPress(self *C.GtkEventControllerKey, keyval C.guint, keycode C.gui
 }
 
 // SignalKeyPress connects a callback for "key_press_event" event
-func (layout *Layout) SignalKeyPress(callback func(event *GdkEventKey)) {
-	keyPressFn = callback
-	keyEventController := C.gtk_event_controller_key_new()
-	gSignalConnect(C.controllerToGObject(keyEventController), "key-pressed", C.GCallback(C.key_pressed), nil)
-	C.gtk_widget_add_controller(layout.scrolled, keyEventController)
-}
+func SignalKeyPress(callback func(event *GdkEventKey)) { keyPressFn = callback }
 
 var prevButtonTime C.guint32
 var prevButtonType C.GdkEventType
@@ -161,14 +116,7 @@ func widgetButtonPress(self *C.GtkGestureClick, n_press C.gint, x C.gdouble, y C
 }
 
 // SignalButtonPress connects a callback for "button_press_event" event
-func (widget *Widget) SignalButtonPress(callback func(event *GdkEventButton)) {
-	buttonPressFn = callback
-	getstureConroller := C.gtk_gesture_click_new()
-	C.gtk_gesture_single_set_button(C.gestureToGestureSingle(getstureConroller), 0)
-	C.gtk_gesture_single_set_touch_only(C.gestureToGestureSingle(getstureConroller), 0) // false
-	gSignalConnect(C.gestureToGObject(getstureConroller), "pressed", C.GCallback(C.button_pressed), nil)
-	C.gtk_widget_add_controller(widget.gtkWidget, C.gestureToEventController(getstureConroller))
-}
+func SignalButtonPress(callback func(event *GdkEventButton)) { buttonPressFn = callback }
 
 //export widgetButtonRelease
 func widgetButtonRelease(self *C.GtkGestureClick, n_press C.gint, x C.gdouble, y C.gdouble, user_data C.gpointer) {
@@ -188,15 +136,7 @@ func widgetButtonRelease(self *C.GtkGestureClick, n_press C.gint, x C.gdouble, y
 }
 
 // SignalButtonRelease connects a callback for "button_release_event" event
-func (widget *Widget) SignalButtonRelease(callback func(event *GdkEventButton)) {
-	buttonReleaseFn = callback
-	getstureConroller := C.gtk_gesture_click_new()
-	C.gtk_gesture_single_set_button(C.gestureToGestureSingle(getstureConroller), 0)
-	C.gtk_gesture_single_set_touch_only(C.gestureToGestureSingle(getstureConroller), 0) // false
-	gSignalConnect(C.gestureToGObject(getstureConroller), "released", C.GCallback(C.button_released), nil)
-	gSignalConnect(C.gestureToGObject(getstureConroller), "unpaired-release", C.GCallback(C.button_released), nil)
-	C.gtk_widget_add_controller(widget.gtkWidget, C.gestureToEventController(getstureConroller))
-}
+func SignalButtonRelease(callback func(event *GdkEventButton)) { buttonReleaseFn = callback }
 
 //export widgetMotionNotify
 func widgetMotionNotify(self *C.GtkEventControllerMotion, x C.gdouble, y C.gdouble, user_data C.gpointer) {
@@ -216,12 +156,7 @@ func widgetMotionNotify(self *C.GtkEventControllerMotion, x C.gdouble, y C.gdoub
 }
 
 // SignalMotionNotify connects a callback for "motion_notify_event" event
-func (widget *Widget) SignalMotionNotify(callback func(event *GdkEventMotion)) {
-	motionNotifyFn = callback
-	motionEventController := C.gtk_event_controller_motion_new()
-	gSignalConnect(C.controllerToGObject(motionEventController), "motion", C.GCallback(C.motion_notify), nil)
-	C.gtk_widget_add_controller(widget.gtkWidget, motionEventController)
-}
+func SignalMotionNotify(callback func(event *GdkEventMotion)) { motionNotifyFn = callback }
 
 //export widgetScroll
 func widgetScroll(self *C.GtkEventControllerScroll, dx C.gdouble, dy C.gdouble, user_data C.gpointer) {
@@ -232,16 +167,62 @@ func widgetScroll(self *C.GtkEventControllerScroll, dx C.gdouble, dy C.gdouble, 
 		DX:        dx,
 		DY:        dy,
 	}
-
 	scrollFn(scrollEvent)
 }
 
 // SignalScroll connects a callback for "scroll-event" event
-func (widget *Widget) SignalScroll(callback func(event *GdkEventScroll)) {
-	scrollFn = callback
+func SignalScroll(callback func(event *GdkEventScroll)) { scrollFn = callback }
+
+func gSignalConnect(instance *C.GObject, signal string, handler C.GCallback, data C.gpointer) C.gulong {
+	name := C.CString(signal)
+	defer C.free(unsafe.Pointer(name))
+	return C.GSignalConnect(instance, name, handler, data)
+}
+
+// AppSignalConnect connects application level signals
+func (app *Application) AppSignalConnect() {
+	gSignalConnect(app.GObject(), "activate", C.GCallback(C.app_activate), nil)
+	gSignalConnect(app.GObject(), "shutdown", C.GCallback(C.app_shutdown), nil)
+}
+
+// TopSignalConnect connects application window level signals
+func (top *TopWindow) TopSignalConnect() {
+	gSignalConnect(top.widget.GObject(), "close-request", C.GCallback(C.close_request), nil)
+}
+
+// LayoutSignalConnect connects layout level signals
+func (layout *Layout) LayoutSignalConnect() {
+	sizeWidget = layout.scrolled
+	gSignalConnect(layout.parent.Widget().GObject(), "notify::default-width", C.GCallback(C.size_notify), nil)
+	gSignalConnect(layout.parent.Widget().GObject(), "notify::default-height", C.GCallback(C.size_notify), nil)
+	gSignalConnect(C.adjustmentToGObject(layout.adjustment), "changed", C.GCallback(C.adjustment_notify), nil)
+	gSignalConnect(C.adjustmentToGObject(layout.adjustment), "value-changed", C.GCallback(C.adjustment_notify), nil)
+	C.size_notify_init()
+
+	keyEventController := C.gtk_event_controller_key_new()
+	gSignalConnect(C.controllerToGObject(keyEventController), "key-pressed", C.GCallback(C.key_pressed), nil)
+	C.gtk_widget_add_controller(layout.scrolled, keyEventController)
+
+	getstureConroller := C.gtk_gesture_click_new()
+	C.gtk_gesture_single_set_button(C.gestureToGestureSingle(getstureConroller), 0)
+	C.gtk_gesture_single_set_touch_only(C.gestureToGestureSingle(getstureConroller), 0) // false
+	gSignalConnect(C.gestureToGObject(getstureConroller), "pressed", C.GCallback(C.button_pressed), nil)
+	gSignalConnect(C.gestureToGObject(getstureConroller), "released", C.GCallback(C.button_released), nil)
+	gSignalConnect(C.gestureToGObject(getstureConroller), "unpaired-release", C.GCallback(C.button_released), nil)
+	C.gtk_widget_add_controller(layout.widget.gtkWidget, C.gestureToEventController(getstureConroller))
+
+	motionEventController := C.gtk_event_controller_motion_new()
+	gSignalConnect(C.controllerToGObject(motionEventController), "motion", C.GCallback(C.motion_notify), nil)
+	C.gtk_widget_add_controller(layout.widget.gtkWidget, motionEventController)
+
 	scrollEventController := C.gtk_event_controller_scroll_new(C.GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES)
 	gSignalConnect(C.controllerToGObject(scrollEventController), "scroll", C.GCallback(C.scroll_notify), nil)
-	C.gtk_widget_add_controller(widget.gtkWidget, scrollEventController)
+	C.gtk_widget_add_controller(layout.widget.gtkWidget, scrollEventController)
+}
+
+// SignalDraw connects a callback parameters for "draw" event
+func (drawing *Drawing) SignalDraw(h *cgo.Handle) {
+	C.gtk_drawing_area_set_draw_func(C.widgetToGtkDrawingArea(drawing.Widget().GtkWidget()), C.GCallback(C.window_draw), C.gpointer(h), nil)
 }
 
 //export menuItemActivate
@@ -250,9 +231,7 @@ func menuItemActivate(action *C.GSimpleAction, parameter *C.GVariant, data C.gpo
 }
 
 // SignalMenuItemActivateCallback connects a callback for "activate" event
-func SignalMenuItemActivateCallback(callback func(h *cgo.Handle)) {
-	menuActionFn = callback
-}
+func SignalMenuItemActivateCallback(callback func(h *cgo.Handle)) { menuActionFn = callback }
 
 // SignalMenuItemActivate connects a callback  parameters for "activate" event
 func (action *MenuAction) SignalMenuItemActivate(h *cgo.Handle) {

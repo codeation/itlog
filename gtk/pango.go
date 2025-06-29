@@ -107,8 +107,8 @@ func fontStretch(stretch int) C.PangoStretch {
 }
 
 // NewFontSelection creates FontSelection
-func NewFontSelection(height int, family string, style int, variant int, weight int, stretch int,
-	top *TopWindow,
+func NewFontSelection(
+	height int, family string, style int, variant int, weight int, stretch int, top *TopWindow,
 ) *FontSelection {
 	pangoContext := C.gtk_widget_get_pango_context(top.Widget().GtkWidget())
 	f := &FontSelection{

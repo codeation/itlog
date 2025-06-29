@@ -4,21 +4,21 @@ import (
 	"log"
 	"runtime/cgo"
 
-	"github.com/codeation/itlog/gtk4"
+	gtk "github.com/codeation/itlog/gtk4"
 )
 
 type menuNode struct {
 	id       int
 	parentID int
-	node     *gtk4.MenuNode
+	node     *gtk.MenuNode
 }
 
 type menuItem struct {
 	id        int
 	parentID  int
 	action    string
-	item      *gtk4.MenuItem
-	handler   *gtk4.MenuAction
+	item      *gtk.MenuItem
+	handler   *gtk.MenuAction
 	cgoHandle *cgo.Handle
 }
 
@@ -28,7 +28,7 @@ func (u *uiAPI) onItemActivate(h *cgo.Handle) {
 }
 
 func (u *uiAPI) MenuNew(menuID int, parentMenuID int, label string) {
-	var node *gtk4.MenuNode
+	var node *gtk.MenuNode
 	if parentMenuID == 0 {
 		node = u.menu.NewNode(label)
 	} else {

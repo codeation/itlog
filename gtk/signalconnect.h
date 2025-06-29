@@ -4,7 +4,6 @@
 #include <gtk/gtk.h>
 
 // Application
-void app_startup(GApplication *application, gpointer data);
 void app_activate(GApplication *application, gpointer data);
 void app_shutdown(GApplication *application, gpointer data);
 

@@ -36,9 +36,9 @@ func (u *uiAPI) FrameNew(frameID int, parentFrameID int, x, y, width, height int
 
 	if f.isTop() {
 		layout := u.top.NewLayout()
+		layout.LayoutSignalConnect()
 		f.gtkFrame = layout
 		u.top.ShowAll()
-		layout.SignalSizeAllocate(u.onSizeAllocate)
 	} else {
 		parent, ok := u.frames[parentFrameID]
 		if !ok {

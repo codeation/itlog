@@ -1,7 +1,7 @@
 package uiapi4
 
 import (
-	"github.com/codeation/itlog/gtk4"
+	gtk "github.com/codeation/itlog/gtk4"
 )
 
 const (
@@ -13,26 +13,26 @@ func (u *uiAPI) onDelete() {
 	u.callbacks.EventGeneral(destroyEventID)
 }
 
-func (u *uiAPI) onKeyPress(event *gtk4.GdkEventKey) {
-	u.callbacks.EventKeyboard(gtk4.GdkKey(event))
+func (u *uiAPI) onKeyPress(event *gtk.GdkEventKey) {
+	u.callbacks.EventKeyboard(gtk.GdkKey(event))
 }
 
-func (u *uiAPI) onButtonPress(event *gtk4.GdkEventButton) {
-	u.callbacks.EventButton(gtk4.GdkButton(event))
+func (u *uiAPI) onButtonPress(event *gtk.GdkEventButton) {
+	u.callbacks.EventButton(gtk.GdkButton(event))
 }
 
-func (u *uiAPI) onMotionNotify(event *gtk4.GdkEventMotion) {
-	u.callbacks.EventMotion(gtk4.GdkMotion(event))
+func (u *uiAPI) onMotionNotify(event *gtk.GdkEventMotion) {
+	u.callbacks.EventMotion(gtk.GdkMotion(event))
 }
 
-func (u *uiAPI) onScroll(event *gtk4.GdkEventScroll) {
-	u.callbacks.EventScroll(gtk4.GdkScroll(event))
+func (u *uiAPI) onScroll(event *gtk.GdkEventScroll) {
+	u.callbacks.EventScroll(gtk.GdkScroll(event))
 }
 
 var prevWidth, prevHeight, prevInnerWidth, prevInnerHeight int
 
 func (u *uiAPI) onSizeAllocate(innerWidth int, innerHeight int) {
-	width, height := gtk4.GdkConfigure(u.top)
+	width, height := gtk.GdkConfigure(u.top)
 	if width == prevWidth && height == prevHeight &&
 		innerWidth == prevInnerWidth && innerHeight == prevInnerHeight {
 		return

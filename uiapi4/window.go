@@ -4,11 +4,11 @@ import (
 	"log"
 	"runtime/cgo"
 
-	"github.com/codeation/itlog/gtk4"
+	gtk "github.com/codeation/itlog/gtk4"
 )
 
 type painter interface {
-	Paint(cr *gtk4.Cairo)
+	Paint(cr *gtk.Cairo)
 }
 
 type destroyer interface {
@@ -16,7 +16,7 @@ type destroyer interface {
 }
 
 type window struct {
-	gtkDrawing *gtk4.Drawing
+	gtkDrawing *gtk.Drawing
 	cgoHandle  *cgo.Handle
 	id         int
 	frameID    int
@@ -25,7 +25,7 @@ type window struct {
 	destroyers []destroyer
 }
 
-func onWindowDraw(cr *gtk4.Cairo, h *cgo.Handle) {
+func onWindowDraw(cr *gtk.Cairo, h *cgo.Handle) {
 	w := h.Value().(*window)
 	for _, paint := range w.painters {
 		paint.Paint(cr)
@@ -56,7 +56,7 @@ func (u *uiAPI) WindowNew(windowID int, frameID int, x, y, width, height int) {
 	w.gtkDrawing.Show()
 	w.gtkDrawing.SignalDraw(w.cgoHandle)
 
-	//gtk4.NotifyWeakRef(w.gtkDrawing.Widget().GObject(), u.onWeakRef, uintptr(windowID))
+	//gtk.NotifyWeakRef(w.gtkDrawing.Widget().GObject(), u.onWeakRef, uintptr(windowID))
 }
 
 func (u *uiAPI) WindowDrop(windowID int) {
@@ -124,7 +124,7 @@ func (u *uiAPI) WindowFill(windowID int, x, y, width, height int, r, g, b, a uin
 		log.Printf("WindowFill: window not found: %d", windowID)
 		return
 	}
-	paint := gtk4.NewCairoFillPaint(x, y, width, height, r, g, b, a)
+	paint := gtk.NewCairoFillPaint(x, y, width, height, r, g, b, a)
 	w.painters = append(w.painters, paint)
 }
 
@@ -134,7 +134,7 @@ func (u *uiAPI) WindowLine(windowID int, x0, y0, x1, y1 int, r, g, b, a uint16) 
 		log.Printf("WindowLine: window not found: %d", windowID)
 		return
 	}
-	paint := gtk4.NewCairoLinePaint(x0, y0, x1, y1, r, g, b, a)
+	paint := gtk.NewCairoLinePaint(x0, y0, x1, y1, r, g, b, a)
 	w.painters = append(w.painters, paint)
 }
 
@@ -151,7 +151,7 @@ func (u *uiAPI) WindowText(windowID int, x, y int, r, g, b, a uint16, fontID int
 		return
 	}
 
-	paint := gtk4.NewCairoTextPaint(x, y, r, g, b, a, f.selection, text)
+	paint := gtk.NewCairoTextPaint(x, y, r, g, b, a, f.selection, text)
 	w.painters = append(w.painters, paint)
 	w.destroyers = append(w.destroyers, paint)
 }
@@ -169,6 +169,6 @@ func (u *uiAPI) WindowImage(windowID int, x, y, width, height int, imageID int) 
 		return
 	}
 
-	paint := gtk4.NewCairoImagePaint(x, y, width, height, i.bitmap)
+	paint := gtk.NewCairoImagePaint(x, y, width, height, i.bitmap)
 	w.painters = append(w.painters, paint)
 }

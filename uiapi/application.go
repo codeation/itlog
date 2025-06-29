@@ -32,11 +32,18 @@ func New(callbacks iface.CallbackSet) *uiAPI {
 		callbacks: callbacks,
 	}
 
+	gtk.SignalActivate(u.onActivate)
+	gtk.SignalShutdown(u.onShutdown)
 	gtk.SignalMenuItemActivateCallback(u.onItemActivate)
 	gtk.SignalDrawCallback(onWindowDraw)
-	u.app.SignalStartup(u.onStartup)
-	u.app.SignalActivate(u.onActivate)
-	u.app.SignalShutdown(u.onShutdown)
+	gtk.SignalDelete(u.onDelete)
+	gtk.SignalSizeAllocate(u.onSizeAllocate)
+	gtk.SignalKeyPress(u.onKeyPress)
+	gtk.SignalButtonPress(u.onButtonPress)
+	gtk.SignalButtonRelease(u.onButtonPress)
+	gtk.SignalMotionNotify(u.onMotionNotify)
+	gtk.SignalScroll(u.onScroll)
+	u.app.AppSignalConnect()
 	return u
 }
 
@@ -71,18 +78,10 @@ func (u *uiAPI) ClipboardPut(typeID int, data []byte) {
 
 func (u *uiAPI) Sync() {}
 
-func (u *uiAPI) onStartup() {
-	u.menu = u.app.NewMenu()
-}
-
 func (u *uiAPI) onActivate() {
+	u.menu = u.app.NewMenu()
 	u.top = u.app.NewTopWindow()
-	u.top.Widget().SignalDelete(u.onDelete)
-	u.top.Widget().SignalKeyPress(u.onKeyPress)
-	u.top.Widget().SignalButtonPress(u.onButtonPress)
-	u.top.Widget().SignalButtonRelease(u.onButtonPress)
-	u.top.Widget().SignalMotionNotify(u.onMotionNotify)
-	u.top.Widget().SignalScroll(u.onScroll)
+	u.top.TopSignalConnect()
 }
 
 func (u *uiAPI) onShutdown() {

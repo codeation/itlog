@@ -25,16 +25,16 @@ func NewApplication() *Application {
 func (app *Application) GtkApplication() *C.GtkApplication { return app.a }
 
 // GObject returns C.GObject pointer
-func (app *Application) GObject() *C.GObject { return C.appToGObject(app.a) }
+func (app *Application) GObject() *C.GObject { return C.applicationToGObject(app.a) }
 
 // GApplication returns C.GApplication type pointer
-func (app *Application) GApplication() *C.GApplication { return C.appToGApplication(app.a) }
+func (app *Application) GApplication() *C.GApplication { return C.applicationToGApplication(app.a) }
 
 // GActionMap returns C.GActionMap type pointer
-func (app *Application) GActionMap() *C.GActionMap { return C.appToGActionMap(app.a) }
+func (app *Application) GActionMap() *C.GActionMap { return C.applicationToGActionMap(app.a) }
 
 // GPointer returns C.gpointer address
-func (app *Application) GPointer() C.gpointer { return C.appToGPointer(app.a) }
+func (app *Application) GPointer() C.gpointer { return C.applicationToGPointer(app.a) }
 
 // Quit quits application
 func (app *Application) Quit() {

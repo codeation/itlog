@@ -3,20 +3,20 @@ package uiapi4
 import (
 	"log"
 
-	"github.com/codeation/itlog/gtk4"
+	gtk "github.com/codeation/itlog/gtk4"
 )
 
 type font struct {
 	id        int
 	height    int
-	selection *gtk4.FontSelection
+	selection *gtk.FontSelection
 }
 
 func (u *uiAPI) FontNew(fontID int, height int, style, variant, weight, stretch int, family string) (int, int, int, int) {
 	f := &font{
 		id:        fontID,
 		height:    height,
-		selection: gtk4.NewFontSelection(height, family, style, variant, weight, stretch, u.top),
+		selection: gtk.NewFontSelection(height, family, style, variant, weight, stretch, u.top),
 	}
 	u.fonts[fontID] = f
 

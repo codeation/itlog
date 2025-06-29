@@ -3,13 +3,13 @@ package uiapi4
 
 import (
 	"github.com/codeation/impress/joint/iface"
-	"github.com/codeation/itlog/gtk4"
+	gtk "github.com/codeation/itlog/gtk4"
 )
 
 type uiAPI struct {
-	app       *gtk4.Application
-	top       *gtk4.TopWindow
-	menu      *gtk4.Menu
+	app       *gtk.Application
+	top       *gtk.TopWindow
+	menu      *gtk.Menu
 	frames    map[int]*frame
 	windows   map[int]*window
 	fonts     map[int]*font
@@ -22,7 +22,7 @@ type uiAPI struct {
 
 func New(callbacks iface.CallbackSet) *uiAPI {
 	u := &uiAPI{
-		app:       gtk4.NewApplication(),
+		app:       gtk.NewApplication(),
 		frames:    map[int]*frame{},
 		windows:   map[int]*window{},
 		fonts:     map[int]*font{},
@@ -31,12 +31,18 @@ func New(callbacks iface.CallbackSet) *uiAPI {
 		menuItems: map[int]*menuItem{},
 		callbacks: callbacks,
 	}
-
-	gtk4.SignalMenuItemActivateCallback(u.onItemActivate)
-	gtk4.SignalDrawCallback(onWindowDraw)
-	u.app.SignalStartup(u.onStartup)
-	u.app.SignalActivate(u.onActivate)
-	u.app.SignalShutdown(u.onShutdown)
+	gtk.SignalActivate(u.onActivate)
+	gtk.SignalShutdown(u.onShutdown)
+	gtk.SignalMenuItemActivateCallback(u.onItemActivate)
+	gtk.SignalDrawCallback(onWindowDraw)
+	gtk.SignalDelete(u.onDelete)
+	gtk.SignalSizeAllocate(u.onSizeAllocate)
+	gtk.SignalKeyPress(u.onKeyPress)
+	gtk.SignalButtonPress(u.onButtonPress)
+	gtk.SignalButtonRelease(u.onButtonPress)
+	gtk.SignalMotionNotify(u.onMotionNotify)
+	gtk.SignalScroll(u.onScroll)
+	u.app.AppSignalConnect()
 	return u
 }
 
@@ -62,22 +68,19 @@ func (u *uiAPI) ApplicationExit() {
 func (u *uiAPI) ApplicationVersion() string { return logAPIVersion }
 
 func (u *uiAPI) ClipboardGet(typeID int) {
-	gtk4.RequestClipboardText(u.onClipboardText)
+	gtk.RequestClipboardText(u.onClipboardText)
 }
 
 func (u *uiAPI) ClipboardPut(typeID int, data []byte) {
-	gtk4.SetClipboardText(u.top, string(data))
+	gtk.SetClipboardText(u.top, string(data))
 }
 
 func (u *uiAPI) Sync() {}
 
-func (u *uiAPI) onStartup() {
-	u.menu = u.app.NewMenu()
-}
-
 func (u *uiAPI) onActivate() {
+	u.menu = u.app.NewMenu()
 	u.top = u.app.NewTopWindow()
-	u.top.Widget().SignalDelete(u.onDelete)
+	u.top.TopSignalConnect()
 }
 
 func (u *uiAPI) onShutdown() {

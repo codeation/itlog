@@ -3,12 +3,12 @@ package uiapi4
 import (
 	"log"
 
-	"github.com/codeation/itlog/gtk4"
+	gtk "github.com/codeation/itlog/gtk4"
 )
 
 type gtkFramer interface {
-	NewFixed() *gtk4.Fixed
-	NewDrawingArea() *gtk4.Drawing
+	NewFixed() *gtk.Fixed
+	NewDrawingArea() *gtk.Drawing
 	Destroy()
 	Show()
 	Move(x, y int)
@@ -36,14 +36,9 @@ func (u *uiAPI) FrameNew(frameID int, parentFrameID int, x, y, width, height int
 
 	if f.isTop() {
 		layout := u.top.NewLayout()
+		layout.LayoutSignalConnect()
 		f.gtkFrame = layout
 		u.top.ShowAll()
-		layout.SignalSizeAllocate(u.onSizeAllocate)
-		layout.SignalKeyPress(u.onKeyPress)
-		layout.Widget().SignalButtonPress(u.onButtonPress)
-		layout.Widget().SignalButtonRelease(u.onButtonPress)
-		layout.Widget().SignalMotionNotify(u.onMotionNotify)
-		layout.Widget().SignalScroll(u.onScroll)
 	} else {
 		parent, ok := u.frames[parentFrameID]
 		if !ok {
