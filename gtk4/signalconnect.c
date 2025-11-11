@@ -19,36 +19,36 @@ void window_draw(GtkDrawingArea *widget, cairo_t *cr, int width, int height, gpo
     windowDraw(widget, cr, data);
 }
 
-void widgetDelete(GtkWindow *self, gpointer user_data);
+void widgetDelete(GtkWindow *self, gpointer data);
 
-gboolean close_request(GtkWindow *self, gpointer user_data) {
-    widgetDelete(self, user_data);
+gboolean close_request(GtkWindow *self, gpointer data) {
+    widgetDelete(self, data);
     return TRUE;
 }
 
 int idle_count = 0;
 
-void widgetIdle(gpointer user_data);
+void widgetIdle(gpointer data);
 
-gboolean idle_func(gpointer user_data) {
+gboolean idle_func(gpointer data) {
     idle_count--;
     if (idle_count > 0) {
         return G_SOURCE_CONTINUE;
     }
-    widgetIdle(user_data);
+    widgetIdle(data);
     return G_SOURCE_REMOVE;
 }
 
-void size_notify(GObject *self, GParamSpec *pspec, gpointer user_data) {
+void size_notify(GObject *self, GParamSpec *pspec, gpointer data) {
     if (idle_count <= 0) {
-        g_idle_add(idle_func, user_data);
+        g_idle_add(idle_func, data);
     }
     idle_count++;
 }
 
-void adjustment_notify(GtkAdjustment *self, gpointer user_data) {
+void adjustment_notify(GtkAdjustment *self, gpointer data) {
     if (idle_count <= 0) {
-        g_idle_add(idle_func, user_data);
+        g_idle_add(idle_func, data);
     }
     idle_count++;
 }
@@ -56,36 +56,36 @@ void adjustment_notify(GtkAdjustment *self, gpointer user_data) {
 void size_notify_init() { adjustment_notify(NULL, NULL); }
 
 void widgetKeyPress(GtkEventControllerKey *self, guint keyval, guint keycode, GdkModifierType state,
-                    gpointer user_data);
+                    gpointer data);
 
 gboolean key_pressed(GtkEventControllerKey *self, guint keyval, guint keycode, GdkModifierType state,
-                     gpointer user_data) {
-    widgetKeyPress(self, keyval, keycode, state, user_data);
+                     gpointer data) {
+    widgetKeyPress(self, keyval, keycode, state, data);
     return TRUE;
 }
 
-void widgetButtonPress(GtkGestureClick *self, gint n_press, gdouble x, gdouble y, gpointer user_data);
+void widgetButtonPress(GtkGestureClick *self, gint n_press, gdouble x, gdouble y, gpointer data);
 
-void button_pressed(GtkGestureClick *self, gint n_press, gdouble x, gdouble y, gpointer user_data) {
-    widgetButtonPress(self, n_press, x, y, user_data);
+void button_pressed(GtkGestureClick *self, gint n_press, gdouble x, gdouble y, gpointer data) {
+    widgetButtonPress(self, n_press, x, y, data);
 }
 
-void widgetButtonRelease(GtkGestureClick *self, gint n_press, gdouble x, gdouble y, gpointer user_data);
+void widgetButtonRelease(GtkGestureClick *self, gint n_press, gdouble x, gdouble y, gpointer data);
 
-void button_released(GtkGestureClick *self, gint n_press, gdouble x, gdouble y, gpointer user_data) {
-    widgetButtonRelease(self, n_press, x, y, user_data);
+void button_released(GtkGestureClick *self, gint n_press, gdouble x, gdouble y, gpointer data) {
+    widgetButtonRelease(self, n_press, x, y, data);
 }
 
-void widgetMotionNotify(GtkEventControllerMotion *self, gdouble x, gdouble y, gpointer user_data);
+void widgetMotionNotify(GtkEventControllerMotion *self, gdouble x, gdouble y, gpointer data);
 
-void motion_notify(GtkEventControllerMotion *self, gdouble x, gdouble y, gpointer user_data) {
-    widgetMotionNotify(self, x, y, user_data);
+void motion_notify(GtkEventControllerMotion *self, gdouble x, gdouble y, gpointer data) {
+    widgetMotionNotify(self, x, y, data);
 }
 
-void widgetScroll(GtkEventControllerScroll *self, gdouble dx, gdouble dy, gpointer user_data);
+void widgetScroll(GtkEventControllerScroll *self, gdouble dx, gdouble dy, gpointer data);
 
-gboolean scroll_notify(GtkEventControllerScroll *self, gdouble dx, gdouble dy, gpointer user_data) {
-    widgetScroll(self, dx, dy, user_data);
+gboolean scroll_notify(GtkEventControllerScroll *self, gdouble dx, gdouble dy, gpointer data) {
+    widgetScroll(self, dx, dy, data);
     return TRUE;
 }
 

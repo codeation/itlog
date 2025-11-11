@@ -130,6 +130,12 @@ func (app *Application) AppSignalConnect() {
 	gSignalConnect(app.GObject(), "shutdown", C.GCallback(C.app_shutdown), nil)
 }
 
+// AppSignalDisconnect disconnects application level signals
+func (app *Application) AppSignalDisconnect() {
+	C.GSignalHandlersDisconnectByFunc(app.GObject(), C.GCallback(C.app_activate), nil)
+	C.GSignalHandlersDisconnectByFunc(app.GObject(), C.GCallback(C.app_shutdown), nil)
+}
+
 // TopSignalConnect connects application window level signals
 func (top *TopWindow) TopSignalConnect() {
 	gSignalConnect(top.widget.GObject(), "delete-event", C.GCallback(C.widget_delete), nil)
@@ -140,9 +146,24 @@ func (top *TopWindow) TopSignalConnect() {
 	gSignalConnect(top.widget.GObject(), "scroll-event", C.GCallback(C.widget_scroll), nil)
 }
 
+// TopSignalDisconnect disconnects application window level signals
+func (top *TopWindow) TopSignalDisconnect() {
+	C.GSignalHandlersDisconnectByFunc(top.widget.GObject(), C.GCallback(C.widget_delete), nil)
+	C.GSignalHandlersDisconnectByFunc(top.widget.GObject(), C.GCallback(C.widget_key_press), nil)
+	C.GSignalHandlersDisconnectByFunc(top.widget.GObject(), C.GCallback(C.widget_button_press), nil)
+	C.GSignalHandlersDisconnectByFunc(top.widget.GObject(), C.GCallback(C.widget_button_release), nil)
+	C.GSignalHandlersDisconnectByFunc(top.widget.GObject(), C.GCallback(C.widget_motion_notify), nil)
+	C.GSignalHandlersDisconnectByFunc(top.widget.GObject(), C.GCallback(C.widget_scroll), nil)
+}
+
 // LayoutSignalConnect connects layout level signals
 func (layout *Layout) LayoutSignalConnect() {
 	gSignalConnect(layout.widget.GObject(), "size-allocate", C.GCallback(C.widget_size_allocate), nil)
+}
+
+// LayoutSignalDisconnect disconnects layout level signals
+func (layout *Layout) LayoutSignalDisconnect() {
+	C.GSignalHandlersDisconnectByFunc(layout.widget.GObject(), C.GCallback(C.widget_size_allocate), nil)
 }
 
 // SignalDraw connects a callback parameters for "draw" event

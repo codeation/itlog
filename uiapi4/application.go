@@ -60,7 +60,11 @@ func (u *uiAPI) ApplicationSize(x, y, width, height int) {
 
 func (u *uiAPI) ApplicationExit() {
 	u.exitCount++
-	if u.exitCount > 1 {
+	switch u.exitCount {
+	case 1:
+		u.top.TopSignalDisconnect()
+	case 2:
+		u.top.Destroy()
 		u.app.Quit()
 	}
 }
@@ -81,9 +85,10 @@ func (u *uiAPI) onActivate() {
 	u.menu = u.app.NewMenu()
 	u.top = u.app.NewTopWindow()
 	u.top.TopSignalConnect()
+
+	//gtk.NotifyWeakRef(u.top.Widget().GObject(), u.onWeakRef, uintptr(9001))
 }
 
 func (u *uiAPI) onShutdown() {
-	u.top.Destroy()
-	u.app.Quit()
+	u.app.AppSignalDisconnect()
 }

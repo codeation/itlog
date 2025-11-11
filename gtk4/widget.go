@@ -54,24 +54,30 @@ func (window *TopWindow) Size(x, y, width, height int) {
 }
 
 type container interface {
-	addChild(child *Widget)
+	addChild(child *Widget, x, y float64)
+	getChildPosition(child *Widget) (x, y float64)
 	removeChild(child *Widget)
-	moveChild(child *Widget, x, y int)
+	moveChild(child *Widget, x, y float64)
 }
 
 func raiseChild(parent container, child *Widget) {
+	x, y := parent.getChildPosition(child)
 	C.g_object_ref(C.widgetToGPointer(child.gtkWidget))
 	parent.removeChild(child)
-	parent.addChild(child)
+	parent.addChild(child, x, y)
 	C.g_object_unref(C.widgetToGPointer(child.gtkWidget))
 }
 
 // Layout contains GtkLayout widget
 type Layout struct {
-	widget     *Widget
-	parent     *TopWindow
-	scrolled   *C.GtkWidget
-	adjustment *C.GtkAdjustment
+	widget                *Widget
+	parent                *TopWindow
+	scrolled              *C.GtkWidget
+	adjustment            *C.GtkAdjustment
+	keyEventController    *C.GtkEventController
+	getstureConroller     *C.GtkGesture
+	motionEventController *C.GtkEventController
+	scrollEventController *C.GtkEventController
 }
 
 // NewLayout creates a LayoutWidget
@@ -100,7 +106,12 @@ func (window *TopWindow) NewLayout() *Layout {
 func (layout *Layout) Widget() *Widget { return layout.widget }
 
 // Destroy destroys widget
-func (layout *Layout) Destroy() {}
+func (layout *Layout) Destroy() {
+	C.gtk_scrolled_window_set_hadjustment(C.widgetToGtkScrolledWindow(layout.scrolled), nil)
+	C.gtk_scrolled_window_set_vadjustment(C.widgetToGtkScrolledWindow(layout.scrolled), nil)
+	C.gtk_scrolled_window_set_child(C.widgetToGtkScrolledWindow(layout.scrolled), nil)
+	C.gtk_window_set_child(C.widgetToGtkWindow(layout.parent.widget.gtkWidget), nil)
+}
 
 // NewFixed creates a FixedWidget child
 func (layout *Layout) NewFixed() *Fixed { return newFixed(layout) }
@@ -123,15 +134,21 @@ func (layout *Layout) Move(x, y int) {}
 // Raise is a empty method
 func (layout *Layout) Raise() {}
 
-func (layout *Layout) addChild(child *Widget) {
-	C.gtk_widget_set_parent(child.gtkWidget, layout.widget.gtkWidget)
+func (layout *Layout) getChildPosition(child *Widget) (float64, float64) {
+	var x, y C.double
+	C.gtk_fixed_get_child_position(C.widgetToGtkFixed(layout.widget.gtkWidget), child.gtkWidget, &x, &y)
+	return float64(x), float64(y)
+}
+
+func (layout *Layout) addChild(child *Widget, x, y float64) {
+	C.gtk_fixed_put(C.widgetToGtkFixed(layout.widget.gtkWidget), child.gtkWidget, C.double(x), C.double(y))
 }
 
 func (layout *Layout) removeChild(child *Widget) {
-	C.gtk_widget_unparent(child.gtkWidget)
+	C.gtk_fixed_remove(C.widgetToGtkFixed(layout.widget.gtkWidget), child.gtkWidget)
 }
 
-func (layout *Layout) moveChild(child *Widget, x, y int) {
+func (layout *Layout) moveChild(child *Widget, x, y float64) {
 	C.gtk_fixed_move(C.widgetToGtkFixed(layout.widget.gtkWidget), child.gtkWidget, C.double(x), C.double(y))
 }
 
@@ -147,7 +164,7 @@ func newFixed(parent container) *Fixed {
 		parent: parent,
 	}
 	C.gtk_widget_set_overflow(fixed.widget.gtkWidget, C.GTK_OVERFLOW_HIDDEN)
-	parent.addChild(fixed.widget)
+	parent.addChild(fixed.widget, 0, 0)
 	return fixed
 }
 
@@ -155,7 +172,7 @@ func newFixed(parent container) *Fixed {
 func (fixed *Fixed) Widget() *Widget { return fixed.widget }
 
 // Destroy destroys widget
-func (fixed *Fixed) Destroy() { C.gtk_widget_unparent(fixed.widget.gtkWidget) }
+func (fixed *Fixed) Destroy() { fixed.parent.removeChild(fixed.widget) }
 
 // NewFixed creates a FixedWidget child
 func (fixed *Fixed) NewFixed() *Fixed { return newFixed(fixed) }
@@ -172,20 +189,26 @@ func (fixed *Fixed) Size(width, height int) {
 }
 
 // Move shifts widget to a new coordinates
-func (fixed *Fixed) Move(x, y int) { fixed.parent.moveChild(fixed.widget, x, y) }
+func (fixed *Fixed) Move(x, y int) { fixed.parent.moveChild(fixed.widget, float64(x), float64(y)) }
 
 // Raise raises widget
 func (fixed *Fixed) Raise() { raiseChild(fixed.parent, fixed.widget) }
 
-func (fixed *Fixed) addChild(child *Widget) {
-	C.gtk_widget_set_parent(child.gtkWidget, fixed.widget.gtkWidget)
+func (fixed *Fixed) getChildPosition(child *Widget) (float64, float64) {
+	var x, y C.double
+	C.gtk_fixed_get_child_position(C.widgetToGtkFixed(fixed.widget.gtkWidget), child.gtkWidget, &x, &y)
+	return float64(x), float64(y)
+}
+
+func (fixed *Fixed) addChild(child *Widget, x, y float64) {
+	C.gtk_fixed_put(C.widgetToGtkFixed(fixed.widget.gtkWidget), child.gtkWidget, C.double(x), C.double(y))
 }
 
 func (fixed *Fixed) removeChild(child *Widget) {
-	C.gtk_widget_unparent(child.gtkWidget)
+	C.gtk_fixed_remove(C.widgetToGtkFixed(fixed.widget.gtkWidget), child.gtkWidget)
 }
 
-func (fixed *Fixed) moveChild(child *Widget, x, y int) {
+func (fixed *Fixed) moveChild(child *Widget, x, y float64) {
 	C.gtk_fixed_move(C.widgetToGtkFixed(fixed.widget.gtkWidget), child.gtkWidget, C.double(x), C.double(y))
 }
 
@@ -200,7 +223,7 @@ func newDrawing(parent container) *Drawing {
 		widget: newWidget(C.gtk_drawing_area_new()),
 		parent: parent,
 	}
-	parent.addChild(drawing.widget)
+	parent.addChild(drawing.widget, 0, 0)
 	return drawing
 }
 
@@ -208,7 +231,7 @@ func newDrawing(parent container) *Drawing {
 func (drawing *Drawing) Widget() *Widget { return drawing.widget }
 
 // Destroy destroys widget
-func (drawing *Drawing) Destroy() { C.gtk_widget_unparent(drawing.widget.gtkWidget) }
+func (drawing *Drawing) Destroy() { drawing.parent.removeChild(drawing.widget) }
 
 // Show shows widget
 func (drawing *Drawing) Show() { C.gtk_widget_set_visible(drawing.widget.gtkWidget, 1) /* true */ }
@@ -220,7 +243,9 @@ func (drawing *Drawing) Size(width, height int) {
 }
 
 // Move shifts widget to a new coordinates
-func (drawing *Drawing) Move(x, y int) { drawing.parent.moveChild(drawing.widget, x, y) }
+func (drawing *Drawing) Move(x, y int) {
+	drawing.parent.moveChild(drawing.widget, float64(x), float64(y))
+}
 
 // Raise raises widget
 func (drawing *Drawing) Raise() { raiseChild(drawing.parent, drawing.widget) }

@@ -34,4 +34,8 @@ inline gulong GSignalConnect(GObject *instance, const gchar *detailed_signal, GC
     return g_signal_connect_data(instance, detailed_signal, c_handler, data, NULL, 0);
 }
 
+inline void GSignalHandlersDisconnectByFunc(GObject *instance, GCallback c_handler, gpointer data) {
+    g_signal_handlers_disconnect_by_func(instance, c_handler, data);
+}
+
 #endif

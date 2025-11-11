@@ -39,6 +39,8 @@ func (u *uiAPI) FrameNew(frameID int, parentFrameID int, x, y, width, height int
 		layout.LayoutSignalConnect()
 		f.gtkFrame = layout
 		u.top.ShowAll()
+
+		//gtk.NotifyWeakRef(layout.Widget().GObject(), u.onWeakRef, uintptr(1000+frameID))
 	} else {
 		parent, ok := u.frames[parentFrameID]
 		if !ok {
@@ -57,6 +59,15 @@ func (u *uiAPI) FrameDrop(frameID int) {
 	if !ok {
 		log.Printf("FrameDrop: frame not found: %d", frameID)
 		return
+	}
+
+	if f.isTop() {
+		layout, ok := f.gtkFrame.(*gtk.Layout)
+		if !ok {
+			log.Printf("FrameDrop: top frame type unknown: %T", f.gtkFrame)
+			return
+		}
+		layout.LayoutSignalDisconnect()
 	}
 
 	f.gtkFrame.Destroy()
