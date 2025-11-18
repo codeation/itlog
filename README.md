@@ -147,4 +147,4 @@ Steps 0-2 are needed to build a Cgo version of impress terminal.
 ### Notes
 
 - The project is currently in its beta stage.
-- The project was tested on Debian 13.1 and macOS 26.1.
+- The project was tested on Debian 12.9 and macOS 15.4.1.
