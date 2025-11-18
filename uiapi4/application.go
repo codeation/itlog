@@ -9,6 +9,7 @@ import (
 type uiAPI struct {
 	app       *gtk.Application
 	top       *gtk.TopWindow
+	layout    *gtk.Layout
 	menu      *gtk.Menu
 	frames    map[int]*frame
 	windows   map[int]*window
@@ -72,7 +73,7 @@ func (u *uiAPI) ApplicationExit() {
 func (u *uiAPI) ApplicationVersion() string { return logAPIVersion }
 
 func (u *uiAPI) ClipboardGet(typeID int) {
-	gtk.RequestClipboardText(u.onClipboardText)
+	gtk.RequestClipboardText(u.top, u.onClipboardText)
 }
 
 func (u *uiAPI) ClipboardPut(typeID int, data []byte) {

@@ -1,6 +1,7 @@
 package uiapi4
 
 import (
+	"github.com/codeation/impress/event"
 	gtk "github.com/codeation/itlog/gtk4"
 )
 
@@ -13,16 +14,19 @@ func (u *uiAPI) onDelete() {
 	u.callbacks.EventGeneral(destroyEventID)
 }
 
-func (u *uiAPI) onKeyPress(event *gtk.GdkEventKey) {
-	u.callbacks.EventKeyboard(gtk.GdkKey(event))
+func (u *uiAPI) onKeyPress(ev *gtk.GdkEventKey) {
+	u.callbacks.EventKeyboard(gtk.GdkKey(ev))
 }
 
-func (u *uiAPI) onButtonPress(event *gtk.GdkEventButton) {
-	u.callbacks.EventButton(gtk.GdkButton(event))
+func (u *uiAPI) onButtonPress(ev *gtk.GdkEventButton) {
+	u.callbacks.EventButton(gtk.GdkButton(ev))
+	if ev.Type == event.ButtonActionRelease {
+		u.layout.GrabFocus()
+	}
 }
 
-func (u *uiAPI) onMotionNotify(event *gtk.GdkEventMotion) {
-	u.callbacks.EventMotion(gtk.GdkMotion(event))
+func (u *uiAPI) onMotionNotify(ev *gtk.GdkEventMotion) {
+	u.callbacks.EventMotion(gtk.GdkMotion(ev))
 }
 
 func (u *uiAPI) onScroll(event *gtk.GdkEventScroll) {

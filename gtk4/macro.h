@@ -18,6 +18,8 @@ inline gpointer layoutToGPointer(PangoLayout *layout) { return layout; }
 inline gpointer menuToGPointer(GMenu *menu) { return menu; }
 inline gpointer menuItemToGPointer(GMenuItem *item) { return item; }
 
+inline GtkWidget *gpointerToWidget(gpointer widget) { return GTK_WIDGET(widget); }
+
 inline GAction *simpleToGAction(GSimpleAction *simpleAction) { return G_ACTION(simpleAction); }
 
 inline GActionMap *applicationToGActionMap(GtkApplication *app) { return G_ACTION_MAP(app); }

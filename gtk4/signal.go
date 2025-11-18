@@ -24,6 +24,7 @@ var (
 	scrollFn        = func(event *GdkEventScroll) {}
 	clipboardFn     = func(text string) {}
 	weakRefFn       = func(data uintptr) {}
+	idleNotifyFn    = func() {}
 )
 
 //export appActivate
@@ -52,12 +53,10 @@ func widgetDelete(self *C.GtkWindow, data C.gpointer) { deleteFn() }
 // SignalDelete connects a callback for "delete-event" event
 func SignalDelete(callback func()) { deleteFn = callback }
 
-var sizeWidget *C.GtkWidget
-
 //export widgetIdle
 func widgetIdle(data C.gpointer) {
-	width := int(C.gtk_widget_get_width(sizeWidget))
-	height := int(C.gtk_widget_get_height(sizeWidget))
+	width := int(C.gtk_widget_get_width(C.gpointerToWidget(data)))
+	height := int(C.gtk_widget_get_height(C.gpointerToWidget(data)))
 	if width == 0 && height == 0 {
 		return
 	}
@@ -203,12 +202,11 @@ func (top *TopWindow) TopSignalDisconnect() {
 
 // LayoutSignalConnect connects layout level signals
 func (layout *Layout) LayoutSignalConnect() {
-	sizeWidget = layout.scrolled
-	gSignalConnect(layout.parent.Widget().GObject(), "notify::default-width", C.GCallback(C.size_notify), nil)
-	gSignalConnect(layout.parent.Widget().GObject(), "notify::default-height", C.GCallback(C.size_notify), nil)
-	gSignalConnect(C.adjustmentToGObject(layout.adjustment), "changed", C.GCallback(C.adjustment_notify), nil)
-	gSignalConnect(C.adjustmentToGObject(layout.adjustment), "value-changed", C.GCallback(C.adjustment_notify), nil)
-	C.size_notify_init()
+	gSignalConnect(layout.parent.Widget().GObject(), "notify::default-width", C.GCallback(C.size_notify), C.gpointer(layout.scrolled))
+	gSignalConnect(layout.parent.Widget().GObject(), "notify::default-height", C.GCallback(C.size_notify), C.gpointer(layout.scrolled))
+	gSignalConnect(C.adjustmentToGObject(layout.adjustment), "changed", C.GCallback(C.adjustment_notify), C.gpointer(layout.scrolled))
+	gSignalConnect(C.adjustmentToGObject(layout.adjustment), "value-changed", C.GCallback(C.adjustment_notify), C.gpointer(layout.scrolled))
+	C.size_notify_init(C.gpointer(layout.scrolled))
 
 	layout.keyEventController = C.gtk_event_controller_key_new()
 	gSignalConnect(C.controllerToGObject(layout.keyEventController), "key-pressed", C.GCallback(C.key_pressed), nil)
@@ -275,9 +273,9 @@ func clipboardTextReceived(source_object *C.GObject, res *C.GAsyncResult, data C
 }
 
 // RequestClipboardText connects a callback for clipboard receiving
-func RequestClipboardText(callback func(text string)) {
+func RequestClipboardText(top *TopWindow, callback func(text string)) {
 	clipboardFn = callback
-	clipboard := C.gdk_display_get_primary_clipboard(C.gdk_display_get_default())
+	clipboard := C.gtk_widget_get_clipboard(top.widget.gtkWidget)
 	C.gdk_clipboard_read_text_async(clipboard, nil, C.GCallback(C.clipboard_text_received), nil)
 }
 
@@ -290,4 +288,12 @@ func objectWeakRef(data C.gpointer, where_the_object_was *C.GObject) {
 func NotifyWeakRef(object *C.GObject, callback func(data uintptr), data uintptr) {
 	weakRefFn = callback
 	C.g_object_weak_ref(object, C.GCallback(C.object_weak_notify), C.gpointer(data))
+}
+
+//export idleNotify
+func idleNotify() { idleNotifyFn() }
+
+func SignalIdle(fn func()) {
+	idleNotifyFn = fn
+	C.g_idle_add(C.GSourceFunc(C.idle_notify), nil)
 }

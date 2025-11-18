@@ -134,6 +134,11 @@ func (layout *Layout) Move(x, y int) {}
 // Raise is a empty method
 func (layout *Layout) Raise() {}
 
+// GrabFocus causes application windows to have the keyboard focus. GrabFocus returns focus from the application menu
+func (layout *Layout) GrabFocus() {
+	C.gtk_widget_grab_focus(layout.scrolled)
+}
+
 func (layout *Layout) getChildPosition(child *Widget) (float64, float64) {
 	var x, y C.double
 	C.gtk_fixed_get_child_position(C.widgetToGtkFixed(layout.widget.gtkWidget), child.gtkWidget, &x, &y)

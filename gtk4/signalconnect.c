@@ -53,7 +53,7 @@ void adjustment_notify(GtkAdjustment *self, gpointer data) {
     idle_count++;
 }
 
-void size_notify_init() { adjustment_notify(NULL, NULL); }
+void size_notify_init(gpointer data) { adjustment_notify(NULL, data); }
 
 void widgetKeyPress(GtkEventControllerKey *self, guint keyval, guint keycode, GdkModifierType state,
                     gpointer data);
@@ -112,4 +112,11 @@ void objectWeakRef(gpointer data, GObject *where_the_object_was);
 void object_weak_notify(gpointer data, GObject *where_the_object_was) {
     // printf("object_weak_notify: %s %p\n", G_OBJECT_TYPE_NAME(where_the_object_was), where_the_object_was);
     objectWeakRef(data, where_the_object_was);
+}
+
+void idleNotify();
+
+gboolean idle_notify(gpointer data) {
+    idleNotify();
+    return G_SOURCE_CONTINUE;
 }

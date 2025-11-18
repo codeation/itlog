@@ -28,7 +28,8 @@ void clipboard_text_received(GObject *source_object, GAsyncResult *res, gpointer
 
 // Misc
 void object_weak_notify(gpointer data, GObject *where_the_object_was);
+gboolean idle_notify(gpointer data);
 
-void size_notify_init();
+void size_notify_init(gpointer data);
 
 #endif

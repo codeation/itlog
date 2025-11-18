@@ -25,6 +25,7 @@ type menuItem struct {
 func (u *uiAPI) onItemActivate(h *cgo.Handle) {
 	item := h.Value().(*menuItem)
 	u.callbacks.EventMenu(item.action)
+	u.layout.GrabFocus()
 }
 
 func (u *uiAPI) MenuNew(menuID int, parentMenuID int, label string) {
