@@ -7,30 +7,32 @@ import (
 )
 
 type uiAPI struct {
-	app       *gtk.Application
-	top       *gtk.TopWindow
-	layout    *gtk.Layout
-	menu      *gtk.Menu
-	frames    map[int]*frame
-	windows   map[int]*window
-	fonts     map[int]*font
-	images    map[int]*image
-	menuNodes map[int]*menuNode
-	menuItems map[int]*menuItem
-	callbacks iface.CallbackSet
-	exitCount int
+	app         *gtk.Application
+	top         *gtk.TopWindow
+	layout      *gtk.Layout
+	menu        *gtk.Menu
+	frames      map[int]*frame
+	windows     map[int]*window
+	fonts       map[int]*font
+	fontMetrics map[int]*font
+	images      map[int]*image
+	menuNodes   map[int]*menuNode
+	menuItems   map[int]*menuItem
+	callbacks   iface.CallbackSet
+	exitCount   int
 }
 
 func New(callbacks iface.CallbackSet) *uiAPI {
 	u := &uiAPI{
-		app:       gtk.NewApplication(),
-		frames:    map[int]*frame{},
-		windows:   map[int]*window{},
-		fonts:     map[int]*font{},
-		images:    map[int]*image{},
-		menuNodes: map[int]*menuNode{},
-		menuItems: map[int]*menuItem{},
-		callbacks: callbacks,
+		app:         gtk.NewApplication(),
+		frames:      map[int]*frame{},
+		windows:     map[int]*window{},
+		fonts:       map[int]*font{},
+		fontMetrics: map[int]*font{},
+		images:      map[int]*image{},
+		menuNodes:   map[int]*menuNode{},
+		menuItems:   map[int]*menuItem{},
+		callbacks:   callbacks,
 	}
 	gtk.SignalActivate(u.onActivate)
 	gtk.SignalShutdown(u.onShutdown)

@@ -1,3 +1,3 @@
 package uiapi
 
-const logAPIVersion = "api-6"
+const logAPIVersion = "api-7"
