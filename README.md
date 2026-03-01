@@ -1,5 +1,7 @@
 # impress terminal. Developer version
 
+The repository has been archived to reduce maintenance work. It is now read-only.
+
 This is a part of cross-platform GUI Library for Go. See https://github.com/codeation/impress
 
 The developer version is a Go version of [the impress terminal](https://github.com/codeation/it) with minimal C code (GTK 3 library, etc).
